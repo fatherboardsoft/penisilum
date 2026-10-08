@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penicillium • Deney & Kontrol Takip Sistemi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --nohut:#D8C9A3; --nohut-dark:#B5A276;
+  --yesil:#7FA65A; --yesil-dark:#557A36; --yesil-light:#A9CB80;
+  --kuf:#7C8B8B; --kuf-dark:#46555A; --kuf-deep:#2E3A3C;
+  --bg:#F3F1EA; --card:#fff; --text:#2B3735; --muted:#7A8B8B;
+  --line:#E2DED2; --danger:#C0574B; --shadow:0 4px 20px rgba(46,58,60,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.hidden{display:none !important}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(circle at 15% 20%,rgba(169,203,128,.35),transparent 45%),
+             radial-gradient(circle at 85% 80%,rgba(124,139,139,.45),transparent 50%),
+             linear-gradient(135deg,#33403F 0%,#4A5A56 45%,#5C7A4A 100%);z-index:1000}
+.petri{position:absolute;width:520px;height:520px;border-radius:50%;border:2px solid rgba(216,201,163,.25);
+  box-shadow:inset 0 0 90px rgba(169,203,128,.28),0 0 60px rgba(0,0,0,.2);animation:spin 40s linear infinite}
+.petri::after{content:'';position:absolute;inset:60px;border-radius:50%;border:1px dashed rgba(216,201,163,.22)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-card{position:relative;width:100%;max-width:400px;background:rgba(255,255,255,.97);border-radius:22px;
+  padding:38px 34px;box-shadow:0 24px 70px rgba(0,0,0,.35);border-top:6px solid var(--yesil)}
+.login-card .logo{width:74px;height:74px;margin:0 auto 16px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--yesil-light),var(--yesil) 45%,var(--kuf) 100%);
+  display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 8px 22px rgba(85,122,54,.35)}
+.login-card h1{text-align:center;font-size:22px;letter-spacing:.5px;color:var(--kuf-deep)}
+.login-card .sub{text-align:center;color:var(--muted);font-size:13px;margin:6px 0 26px;letter-spacing:1.5px;text-transform:uppercase}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--kuf-dark);margin-bottom:6px;letter-spacing:.4px}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;
+  font-size:14px;font-family:inherit;background:#FCFBF7;color:var(--text);transition:.18s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--yesil);background:#fff;box-shadow:0 0 0 4px rgba(127,166,90,.14)}
+.btn{border:none;border-radius:11px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:.18s;letter-spacing:.3px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--yesil),var(--yesil-dark));color:#fff;box-shadow:0 6px 18px rgba(85,122,54,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(85,122,54,.4)}
+.btn-full{width:100%}
+.btn-ghost{background:#EDEAE0;color:var(--kuf-dark)}
+.btn-ghost:hover{background:#E2DED1}
+.btn-danger{background:#FBEDEB;color:var(--danger)}
+.btn-danger:hover{background:#F6DCD9}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:8px}
+.error{background:#FBEDEB;color:var(--danger);padding:10px 14px;border-radius:10px;font-size:13px;margin-top:12px;text-align:center;font-weight:600}
+.hint{margin-top:20px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.7;background:#F7F5EE;padding:10px;border-radius:10px;border:1px dashed var(--line)}
+
+/* APP */
+.app{display:flex;min-height:100vh}
+.sidebar{width:255px;flex-shrink:0;background:linear-gradient(180deg,#2E3A3C,#3E4E4C 55%,#4A5C46);
+  color:#DDE3DC;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar .brand{padding:24px 22px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px}
+.sidebar .brand .dot{width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 35% 30%,var(--yesil-light),var(--yesil) 50%,var(--kuf) 100%);
+  box-shadow:0 0 16px rgba(169,203,128,.4)}
+.sidebar .brand b{display:block;font-size:15px;color:#fff;letter-spacing:.4px}
+.sidebar .brand span{font-size:10.5px;color:#9DB08F;letter-spacing:1.6px;text-transform:uppercase}
+.nav{padding:14px 12px;flex:1;overflow-y:auto}
+.nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;color:#B9C6BC;
+  text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;transition:.16s;margin-bottom:4px}
+.nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav a.active{background:linear-gradient(90deg,rgba(127,166,90,.9),rgba(127,166,90,.35));color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.nav a .ico{width:20px;text-align:center;font-size:15px}
+.nav a .lock{margin-left:auto;font-size:11px;opacity:.7}
+.sidebar .foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#8FA08C}
+.userbox{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--nohut);color:var(--kuf-deep);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:16px 28px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:20}
+.topbar h2{font-size:17px;color:var(--kuf-deep);font-weight:700}
+.topbar .crumb{font-size:11.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+.content{padding:26px 28px 60px;max-width:1300px;width:100%}
+.page{animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{background:var(--card);border-radius:16px;padding:22px;box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:20px}
+.card-title{font-size:14.5px;font-weight:800;color:var(--kuf-deep);margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.card-title::before{content:'';width:4px;height:17px;border-radius:3px;background:linear-gradient(180deg,var(--yesil),var(--kuf))}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.stat{background:#fff;border-radius:15px;padding:18px;border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:50%;opacity:.13}
+.stat.s1::after{background:var(--yesil)} .stat.s2::after{background:var(--kuf)}
+.stat.s3::after{background:var(--nohut-dark)} .stat.s4::after{background:var(--yesil-dark)}
+.stat .lbl{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat .val{font-size:27px;font-weight:800;color:var(--kuf-deep);margin-top:7px;letter-spacing:-.5px}
+.stat .val small{font-size:13px;font-weight:600;color:var(--muted);margin-left:3px}
+
+/* HERO */
+.hero{border-radius:20px;padding:30px 32px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(120deg,#37463F 0%,#4E6350 40%,#6E8A4E 100%);box-shadow:0 12px 34px rgba(46,58,60,.24)}
+.hero::before{content:'';position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(169,203,128,.55),rgba(124,139,139,.25) 60%,transparent 72%)}
+.hero::after{content:'';position:absolute;right:70px;bottom:-90px;width:190px;height:190px;border-radius:50%;
+  border:1.5px dashed rgba(216,201,163,.35)}
+.hero h1{font-size:24px;margin-bottom:10px;position:relative}
+.hero p{font-size:13.6px;line-height:1.75;color:#D8E0D2;max-width:760px;position:relative}
+.hero .tags{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;position:relative}
+.tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);padding:6px 13px;border-radius:20px;font-size:11.5px;font-weight:600}
+
+.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700}
+.b-deney{background:#EAF3DF;color:var(--yesil-dark)}
+.b-kontrol{background:#E8EDED;color:var(--kuf-dark)}
+.b-nohut{background:#F5EFDF;color:#8A7440}
+.b-warn{background:#FBF4E6;color:#8A6428}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;min-width:820px}
+thead th{background:#F1EFE7;color:var(--kuf-dark);font-size:11px;letter-spacing:.9px;text-transform:uppercase;
+  padding:13px 14px;text-align:left;font-weight:800;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody td{padding:12px 14px;border-bottom:1px solid #F0EDE5;color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FAF9F4}
+.thumb{width:46px;height:46px;border-radius:9px;object-fit:cover;cursor:pointer;border:2px solid var(--line);transition:.18s}
+.thumb:hover{transform:scale(1.09);border-color:var(--yesil)}
+.empty{text-align:center;padding:46px 20px;color:var(--muted);font-size:13.5px}
+.empty .big{font-size:38px;margin-bottom:10px;opacity:.4}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.form-grid .full{grid-column:1/-1}
+.photo-drop{border:2px dashed var(--line);border-radius:13px;padding:22px;text-align:center;cursor:pointer;transition:.2s;background:#FCFBF6}
+.photo-drop:hover{border-color:var(--yesil);background:#F7FAF1}
+.photo-drop input{display:none}
+.preview{max-width:190px;border-radius:12px;margin-top:14px;border:3px solid #fff;box-shadow:var(--shadow)}
+.actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:22px}
+
+/* GROUP TOGGLE */
+.group-toggle{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.grp-btn{flex:1;min-width:220px;padding:16px 20px;border-radius:14px;border:2px solid var(--line);background:#fff;
+  cursor:pointer;font-family:inherit;text-align:left;transition:.2s;display:flex;align-items:center;gap:14px}
+.grp-btn:hover{border-color:var(--yesil-light);transform:translateY(-2px)}
+.grp-btn.on{border-color:var(--yesil);background:linear-gradient(135deg,#F6FAF1,#EDF5E1);box-shadow:0 8px 20px rgba(127,166,90,.2)}
+.grp-btn.kontrol.on{border-color:var(--kuf);background:linear-gradient(135deg,#F1F4F4,#E4ECEC);box-shadow:0 8px 20px rgba(124,139,139,.2)}
+.grp-btn .ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.grp-btn.deney .ico{background:#EAF3DF}
+.grp-btn.kontrol .ico{background:#E8EDED}
+.grp-btn b{display:block;font-size:14.5px;color:var(--kuf-deep);margin-bottom:3px}
+.grp-btn span{font-size:11.5px;color:var(--muted)}
+
+/* CHECKLIST */
+.checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.check-item{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1.5px solid var(--line);border-radius:11px;
+  cursor:pointer;transition:.16s;background:#FCFBF7;font-size:13px;font-weight:600;color:var(--kuf-dark)}
+.check-item:hover{border-color:var(--yesil-light);background:#F7FAF1}
+.check-item input{display:none}
+.check-item .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;background:#fff;transition:.16s;font-size:13px;color:#fff}
+.check-item.checked{border-color:var(--yesil);background:linear-gradient(135deg,#F6FAF1,#EDF5E1)}
+.check-item.checked .box{background:var(--yesil);border-color:var(--yesil)}
+.check-item.checked .box::after{content:'✓';font-weight:900}
+.check-item .emoji{font-size:17px}
+
+/* CHART */
+.chart-box{position:relative;height:280px;width:100%}
+canvas{width:100%;height:100%;display:block}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg button{border:1.5px solid var(--line);background:#fff;color:var(--kuf-dark);padding:7px 15px;border-radius:20px;
+  font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.16s}
+.seg button:hover{border-color:var(--yesil-light)}
+.seg button.on{background:var(--yesil);border-color:var(--yesil);color:#fff;box-shadow:0 4px 12px rgba(127,166,90,.3)}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;font-weight:600;color:var(--kuf-dark)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend .dot{width:11px;height:11px;border-radius:50%}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(35,45,45,.78);backdrop-filter:blur(4px);display:flex;align-items:center;
+  justify-content:center;z-index:2000;padding:24px}
+.modal img{max-width:90vw;max-height:85vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal .close{position:absolute;top:20px;right:24px;background:#fff;border:none;width:42px;height:42px;border-radius:50%;
+  font-size:20px;cursor:pointer;color:var(--kuf-deep);font-weight:700}
+
+.notice{padding:14px 18px;border-radius:12px;font-size:13px;line-height:1.7;margin-bottom:18px;border-left:4px solid}
+.notice.info{background:#EFF4EA;border-color:var(--yesil);color:#4A6432}
+.notice.warn{background:#FBF4E6;border-color:var(--nohut-dark);color:#7A6428}
+.notice.danger{background:#FBEDEB;border-color:var(--danger);color:#8A3228}
+
+.menu-btn{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--kuf-dark);margin-right:12px}
+@media(max-width:860px){
+  .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:.28s;z-index:900}
+  .sidebar.open{transform:none}
+  .content{padding:18px 16px 60px}
+  .topbar{padding:14px 16px}
+  .hero{padding:24px 20px}
+  .menu-btn{display:flex !important}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="petri"></div>
+  <div class="login-card">
+    <div class="logo">🧫</div>
+    <h1>PENICILLIUM</h1>
+    <div class="sub">Deney & Kontrol Takip Sistemi</div>
+    <div class="field">
+      <label>Kullanıcı</label>
+      <input id="loginUser" value="admin" readonly style="background:#F1EFE7;color:#7A8B8B;font-weight:700">
+    </div>
+    <div class="field">
+      <label>Yönetici Şifresi</label>
+      <input id="loginPass" type="password" placeholder="••••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Giriş Yap</button>
+    <div id="loginError" class="error hidden"></div>
+    <div class="hint">🔒 Bu sistem yalnızca <b>yönetici</b> erişimine açıktır.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app hidden" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div><b>Penicillium</b><span>Deney Takibi</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-page="home" class="active"><span class="ico">🏠</span> Ana Sayfa</a>
+      <a data-page="prep" id="navPrep"><span class="ico">🧪</span> Ön Hazırlık <span class="lock" id="lockPrep">🔓</span></a>
+      <a data-page="entry" id="navEntry"><span class="ico">📝</span> Günlük Ölçüm <span class="lock" id="lockEntry">🔒</span></a>
+      <a data-page="records"><span class="ico">📊</span> Kayıtlar & Grafik</a>
+      <a data-page="report"><span class="ico">📄</span> PDF Rapor</a>
+      <a data-page="data"><span class="ico">🗄️</span> Veri Yönetimi</a>
+    </nav>
+    <div class="foot">
+      <div class="userbox">
+        <div class="avatar">A</div>
+        <div>
+          <div style="color:#fff;font-weight:700;font-size:12.5px">Yönetici</div>
+          <div style="font-size:10.5px">Sistem Yetkilisi</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout()">Çıkış Yap</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center">
+        <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div>
+          <div class="crumb" id="crumb">Panel</div>
+          <h2 id="pageTitle">Ana Sayfa</h2>
+        </div>
+      </div>
+      <div id="topDate" style="font-size:12.5px;color:var(--muted);font-weight:600"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ HOME ============ -->
+      <div class="page" id="page-home">
+        <div class="hero">
+          <h1>🧫 Penicillium Deneyi — Bilimsel Gözlem Günlüğü</h1>
+          <p>
+            Bu platform, <b>Penicillium</b> küf mantarının <b>deney grubu</b> ve <b>kontrol grubu</b>
+            üzerindeki gelişimini karşılaştırmalı olarak izlemek için tasarlanmış
+            <b>bilimsel bir deney takip sistemidir</b>. Sıcaklık, nem, pH ve koloni gelişimi
+            düzenli olarak ölçülür; fotoğraflarla belgelenir. Toplanan veriler hipotez testi,
+            değişken analizi ve bilimsel raporlamada kullanılır.
+          </p>
+          <div class="tags">
+            <span class="tag">🔬 Kontrollü Deney</span>
+            <span class="tag">🧪 Deney Grubu</span>
+            <span class="tag">⚖️ Kontrol Grubu</span>
+            <span class="tag">🌡️ Sıcaklık & Nem</span>
+            <span class="tag">⚗️ pH Analizi</span>
+            <span class="tag">📄 Bilimsel Rapor</span>
+          </div>
+        </div>
+
+        <div id="prepBanner"></div>
+
+        <div class="grid g4" id="homeStats"></div>
+
+        <div class="grid g2" style="margin-top:20px">
+          <div class="card">
+            <div class="card-title">Son Ölçümler</div>
+            <div id="homeRecent"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Deney Protokolü</div>
+            <ol style="font-size:13px;line-height:2;color:#4A5654;padding-left:18px">
+              <li><b>Ön Hazırlık:</b> Deney düzeneği kurulur ve sterilizasyon yapılır.</li>
+              <li><b>Gruplar:</b> Deney ve kontrol grubu petrileri ayrı ayrı etiketlenir.</li>
+              <li><b>Ekim:</b> Deney grubuna Penicillium ekilir, kontrol grubu steril bırakılır.</li>
+              <li><b>İnkübasyon:</b> Her iki grup aynı ortamda bekletilir.</li>
+              <li><b>Günlük Ölçüm:</b> Sıcaklık, nem, pH ve koloni çapı kaydedilir.</li>
+              <li><b>Raporlama:</b> Veriler grafik ve PDF olarak sunulur.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PREP ============ -->
+      <div class="page hidden" id="page-prep">
+        <div class="hero" style="background:linear-gradient(120deg,#2E3A3C,#4E6350 50%,#7C8B8B)">
+          <h1>🧪 Ön Hazırlık — Deney Düzeneği Kurulumu</h1>
+          <p>
+            Günlük ölçümlere başlamadan önce deney düzeneğinin kurulması, sterilizasyon işlemleri
+            ve grup tanımlarının yapılması gerekir. Bu aşamayı tamamlamadan günlük ölçüm sayfası açılmaz.
+          </p>
+        </div>
+
+        <div id="prepStatus"></div>
+
+        <div class="card" id="prepFormCard">
+          <div class="card-title">Deney Bilgileri</div>
+          <form id="prepForm" onsubmit="savePrep(event)">
+            <div class="form-grid">
+              <div class="field full">
+                <label>Deney Başlığı *</label>
+                <input id="pTitle" placeholder="Örn: Penicillium chrysogenum'un Farklı Sıcaklıklarda Gelişimi" required>
+              </div>
+              <div class="field">
+                <label>Deney Başlangıç Tarihi *</label>
+                <input type="date" id="pDate" required>
+              </div>
+              <div class="field">
+                <label>Hedef İnkübasyon Sıcaklığı (°C)</label>
+                <input type="number" step="0.1" id="pTemp" placeholder="25">
+              </div>
+              <div class="field">
+                <label>Hedef Bağıl Nem (%)</label>
+                <input type="number" step="0.1" id="pHum" placeholder="65">
+              </div>
+              <div class="field">
+                <label>Hedef pH</label>
+                <input type="number" step="0.1" id="pPh" placeholder="6.5">
+              </div>
+              <div class="field full">
+                <label>Hipotez *</label>
+                <textarea id="pHypo" rows="2" placeholder="Örn: 25 °C'de inkübe edilen Penicillium, 20 °C'ye göre daha hızlı koloni gelişimi gösterir." required></textarea>
+              </div>
+            </div>
+
+            <div class="card-title" style="margin-top:26px">Deney Grubu Tanımı</div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Deney Grubu Adı</label>
+                <input id="pExpName" value="Deney Grubu" placeholder="Deney Grubu">
+              </div>
+              <div class="field full">
+                <label>Deney Grubu Açıklaması</label>
+                <textarea id="pExpDesc" rows="2" placeholder="Penicillium ekimi yapılmış, test koşullarına maruz bırakılan grup.">Penicillium ekimi yapılmış, test koşullarına maruz bırakılan grup.</textarea>
+              </div>
+            </div>
+
+            <div class="card-title" style="margin-top:26px">Kontrol Grubu Tanımı</div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Kontrol Grubu Adı</label>
+                <input id="pCtlName" value="Kontrol Grubu" placeholder="Kontrol Grubu">
+              </div>
+              <div class="field full">
+                <label>Kontrol Grubu Açıklaması</label>
+                <textarea id="pCtlDesc" rows="2" placeholder="Ekim yapılmamış, aynı koşullarda bekletilen steril referans grup.">Ekim yapılmamış, aynı koşullarda bekletilen steril referans grup.</textarea>
+              </div>
+            </div>
+
+            <div class="card-title" style="margin-top:26px">Deney Düzeneği Hazırlık Adımları</div>
+            <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+              Uyguladığınız hazırlık adımlarını işaretleyin. Bu adımlar PDF raporuna da yansıyacaktır.
+            </p>
+            <div class="checklist" id="checklist"></div>
+
+            <div class="card-title" style="margin-top:26px">Ek Notlar & Düzenek Fotoğrafı</div>
+            <div class="form-grid">
+              <div class="field full">
+                <label>Ek Notlar</label>
+                <textarea id="pNotes" rows="3" placeholder="Kullanılan malzemeler, kimyasallar, cihaz markaları vb."></textarea>
+              </div>
+              <div class="field full">
+                <label>Düzenek Fotoğrafı</label>
+                <div class="photo-drop" onclick="document.getElementById('pPhoto').click()">
+                  <div style="font-size:26px;margin-bottom:6px">📷</div>
+                  <div style="font-size:13px;color:var(--muted)">Kurulmuş deney düzeneğinin fotoğrafını yükleyin</div>
+                  <input type="file" id="pPhoto" accept="image/*" onchange="handlePrepPhoto(event)">
+                  <div id="pPhotoName" style="font-size:11.5px;color:var(--yesil-dark);margin-top:8px;font-weight:600"></div>
+                  <img id="pPhotoPreview" class="preview hidden">
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="btn btn-primary">✅ Ön Hazırlığı Tamamla ve Kilidi Aç</button>
+              <button type="button" class="btn btn-ghost" onclick="resetPrepForm()">Temizle</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============ ENTRY ============ -->
+      <div class="page hidden" id="page-entry">
+        <div id="entryLock"></div>
+
+        <div id="entryWrap">
+          <div class="card">
+            <div class="card-title">Ölçüm Yapılacak Grup</div>
+            <div class="group-toggle">
+              <button type="button" class="grp-btn deney on" id="grpDeney" onclick="selectGroup('deney')">
+                <div class="ico">🧪</div>
+                <div>
+                  <b id="grpDeneyName">Deney Grubu</b>
+                  <span id="grpDeneyDesc">Penicillium ekili grup</span>
+                </div>
+              </button>
+              <button type="button" class="grp-btn kontrol" id="grpKontrol" onclick="selectGroup('kontrol')">
+                <div class="ico">⚖️</div>
+                <div>
+                  <b id="grpKontrolName">Kontrol Grubu</b>
+                  <span id="grpKontrolDesc">Steril referans grup</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" id="entryFormTitle">Günlük Ölçüm Formu — Deney Grubu</div>
+            <form id="entryForm" onsubmit="saveRecord(event)">
+              <input type="hidden" id="recId">
+              <input type="hidden" id="recGroup" value="deney">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Tarih *</label>
+                  <input type="date" id="fDate" required>
+                </div>
+                <div class="field">
+                  <label>Sıcaklık (°C) *</label>
+                  <input type="number" step="0.1" id="fTemp" placeholder="24.5" required>
+                </div>
+                <div class="field">
+                  <label>Bağıl Nem (%) *</label>
+                  <input type="number" step="0.1" min="0" max="100" id="fHum" placeholder="65" required>
+                </div>
+                <div class="field">
+                  <label>pH Değeri *</label>
+                  <input type="number" step="0.01" min="0" max="14" id="fPh" placeholder="6.5" required>
+                </div>
+                <div class="field">
+                  <label>Koloni Çapı (mm)</label>
+                  <input type="number" step="0.1" id="fGrow" placeholder="12">
+                </div>
+                <div class="field">
+                  <label>Küf Rengi / Görünüm</label>
+                  <select id="fColor">
+                    <option value="Yeşil">Yeşil</option>
+                    <option value="Mavi-Yeşil">Mavi-Yeşil</option>
+                    <option value="Küf Grisi">Küf Grisi</option>
+                    <option value="Nohut Rengi">Nohut Rengi</option>
+                    <option value="Beyaz (Miselyum)">Beyaz (Miselyum)</option>
+                    <option value="Sarımsı">Sarımsı</option>
+                    <option value="Koyu Yeşil">Koyu Yeşil</option>
+                    <option value="Renk Yok">Renk Yok (Kontrol)</option>
+                  </select>
+                </div>
+                <div class="field full">
+                  <label>Gözlem Notu</label>
+                  <textarea id="fNote" rows="3" placeholder="Örn: Koloni kenarlarında beyaz miselyum halkası oluştu..."></textarea>
+                </div>
+                <div class="field full">
+                  <label>Gelişim Fotoğrafı</label>
+                  <div class="photo-drop" onclick="document.getElementById('fPhoto').click()">
+                    <div style="font-size:26px;margin-bottom:6px">📷</div>
+                    <div style="font-size:13px;color:var(--muted)">Fotoğraf yüklemek için tıklayın</div>
+                    <input type="file" id="fPhoto" accept="image/*" onchange="handlePhoto(event)">
+                    <div id="photoName" style="font-size:11.5px;color:var(--yesil-dark);margin-top:8px;font-weight:600"></div>
+                    <img id="photoPreview" class="preview hidden">
+                  </div>
+                </div>
+              </div>
+              <div class="actions">
+                <button type="submit" class="btn btn-primary">💾 Ölçümü Kaydet</button>
+                <button type="button" class="btn btn-ghost" onclick="resetForm()">Temizle</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ RECORDS ============ -->
+      <div class="page hidden" id="page-records">
+        <div class="card">
+          <div class="card-title">Gruplar Arası Karşılaştırma Grafiği</div>
+          <div class="legend">
+            <span><span class="dot" style="background:#7FA65A"></span> Deney Grubu</span>
+            <span><span class="dot" style="background:#7C8B8B"></span> Kontrol Grubu</span>
+          </div>
+          <div class="seg" id="metricSeg">
+            <button class="on" data-m="temp">🌡️ Sıcaklık</button>
+            <button data-m="hum">💧 Nem</button>
+            <button data-m="ph">⚗️ pH</button>
+            <button data-m="grow">📈 Koloni Çapı</button>
+          </div>
+          <div class="chart-box"><canvas id="chart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Ölçüm Kayıtları</div>
+          <div class="seg" id="groupFilter">
+            <button class="on" data-g="all">📋 Tümü</button>
+            <button data-g="deney">🧪 Deney Grubu</button>
+            <button data-g="kontrol">⚖️ Kontrol Grubu</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tarih</th><th>Grup</th><th>Sıcaklık</th><th>Nem</th><th>pH</th>
+                  <th>Renk</th><th>Çap</th><th>Not</th><th>Foto</th><th style="text-align:right">İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="recordsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ REPORT ============ -->
+      <div class="page hidden" id="page-report">
+        <div class="hero" style="background:linear-gradient(120deg,#2E3A3C,#4E6350 50%,#7C8B8B)">
+          <h1>📄 Bilimsel Raporlama</h1>
+          <p>
+            Ön hazırlık bilgileri, deney ve kontrol grubuna ait tüm ölçümler, istatistiksel özetler ve
+            gelişim fotoğrafları tek bir PDF dosyasında birleştirilir. Rapor; karşılaştırma tablosu,
+            gözlem notları ve görsel kanıtları içerir.
+          </p>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-title">Rapor İçeriği</div>
+            <ul style="font-size:13px;line-height:2.1;color:#4A5654;padding-left:18px">
+              <li>Deney başlığı, hipotez ve ön hazırlık adımları</li>
+              <li>Deney düzeneği fotoğrafı</li>
+              <li>Grup tanımları (deney & kontrol)</li>
+              <li>Özet istatistikler (her grup için ayrı)</li>
+              <li>Günlük ölçüm tablosu (tüm kayıtlar)</li>
+              <li>Gelişim fotoğrafları galerisi</li>
+              <li>Sayfa numaralandırma ve rapor tarihi</li>
+            </ul>
+            <div class="actions">
+              <button class="btn btn-primary" onclick="exportPDF()">📥 PDF Raporu İndir</button>
+              <button class="btn btn-ghost" onclick="window.print()">🖨️ Yazdır</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Rapor Önizleme Özeti</div>
+            <div id="reportSummary" style="font-size:13.5px;line-height:2.1;color:#4A5654"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ DATA ============ -->
+      <div class="page hidden" id="page-data">
+        <div class="notice info">
+          🗄️ Veriler yalnızca bu tarayıcıda saklanır. Farklı bir bilgisayara taşımak için yedek alın.
+        </div>
+
+        <div class="grid g4" id="dataStats"></div>
+
+        <div class="grid g2" style="margin-top:20px">
+          <div class="card">
+            <div class="card-title">Yedekleme</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <button class="btn btn-ghost" onclick="backupJSON()">💾 Tüm Verileri JSON Yedekle</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('restoreFile').click()">📂 Yedekten Geri Yükle</button>
+              <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreJSON(event)">
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Tehlikeli İşlemler</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <button class="btn btn-danger" onclick="clearRecords()">🗑️ Sadece Ölçüm Kayıtlarını Sil</button>
+              <button class="btn btn-danger" onclick="clearAll()">⚠️ Tüm Sistemi Sıfırla (Hazırlık + Kayıtlar)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal hidden" id="imgModal" onclick="closeModal()">
+  <button class="close" onclick="closeModal()">✕</button>
+  <img id="modalImg" src="">
+</div>
+
+<script>
+/* =========================================================
+   PENICILLIUM DENEY & KONTROL TAKİP SİSTEMİ
+   ========================================================= */
+const ADMIN_PASS = 'admin123456';
+const LS_REC  = 'pnc_v2_records';
+const LS_PREP = 'pnc_v2_prep';
+const LS_SES  = 'pnc_v2_session';
+
+const CHECK_ITEMS = [
+  {k:'steril_alan',   e:'🧴', t:'Çalışma alanı sterilize edildi'},
+  {k:'petri',         e:'🧫', t:'Petri kutuları hazırlandı ve etiketlendi'},
+  {k:'agar',          e:'🥣', t:'Agar besiyeri hazırlandı ve döküldü'},
+  {k:'halka',         e:'🔥', t:'İnokülasyon halkası steril edildi'},
+  {k:'ekim_deney',    e:'🧬', t:'Deney grubuna Penicillium ekimi yapıldı'},
+  {k:'ekim_kontrol',  e:'🚫', t:'Kontrol grubuna steril ekim yapıldı (ekim yok)'},
+  {k:'inkubator',     e:'🌡️', t:'İnkübatör sıcaklığı ayarlandı'},
+  {k:'nem',           e:'💧', t:'Nem kontrol sistemi kuruldu'},
+  {k:'ph_kalib',      e:'⚗️', t:'pH metre kalibrasyonu yapıldı'},
+  {k:'foto_duzen',    e:'📸', t:'Fotoğraf düzeneği ve ışık ayarlandı'},
+  {k:'olcum_cizelge', e:'📝', t:'Ölçüm çizelgesi ve etiket sistemi hazırlandı'},
+  {k:'kke',           e:'🧤', t:'Kişisel koruyucu ekipman kullanıldı'}
+];
+
+let state = {
+  user: null,
+  prep: null,
+  records: [],
+  metric: 'temp',
+  filter: 'all',
+  activeGroup: 'deney',
+  pendingPhoto: null,
+  pendingPrepPhoto: null,
+  prepChecks: {}
+};
+
+/* STORAGE */
+function loadAll(){
+  try{ state.records = JSON.parse(localStorage.getItem(LS_REC)) || []; }catch(e){ state.records = []; }
+  try{ state.prep = JSON.parse(localStorage.getItem(LS_PREP)) || null; }catch(e){ state.prep = null; }
+  if(state.prep && state.prep.checks) state.prepChecks = state.prep.checks;
+}
+function persistRecords(){ localStorage.setItem(LS_REC, JSON.stringify(state.records)); }
+function persistPrep(){ localStorage.setItem(LS_PREP, JSON.stringify(state.prep)); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* LOGIN */
+function doLogin(){
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  if(p !== ADMIN_PASS){
+    err.textContent = '⚠️ Yönetici şifresi hatalı.';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  state.user = { name:'Yönetici', role:'admin' };
+  localStorage.setItem(LS_SES, JSON.stringify(state.user));
+  startApp();
+}
+function doLogout(){
+  localStorage.removeItem(LS_SES);
+  state.user = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginPass').value = '';
+}
+function startApp(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  const d = new Date();
+  document.getElementById('topDate').textContent =
+    d.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+  loadAll();
+  renderChecklist();
+  if(state.prep) fillPrepForm(state.prep);
+  updateLocks();
+  go('home');
+}
+
+/* NAV */
+const TITLES = {
+  home:    ['Panel','Ana Sayfa'],
+  prep:    ['Kurulum','Ön Hazırlık'],
+  entry:   ['Veri Girişi','Günlük Ölçüm'],
+  records: ['Analiz','Kayıtlar & Grafik'],
+  report:  ['Çıktı','PDF Rapor'],
+  data:    ['Sistem','Veri Yönetimi']
+};
+function go(page){
+  // günlük ölçüm kilidi
+  if(page === 'entry' && !state.prep?.completed){
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.getElementById('page-entry').classList.remove('hidden');
+    document.getElementById('crumb').textContent = TITLES.entry[0];
+    document.getElementById('pageTitle').textContent = TITLES.entry[1];
+    document.getElementById('entryLock').innerHTML =
+      `<div class="notice danger">🔒 Günlük ölçümlere başlamadan önce <b>Ön Hazırlık</b> aşamasını tamamlamalısınız.
+       <div style="margin-top:12px"><button class="btn btn-primary btn-sm" onclick="go('prep')">🧪 Ön Hazırlığa Git</button></div></div>`;
+    document.getElementById('entryWrap').classList.add('hidden');
+    document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+    document.getElementById('sidebar').classList.remove('open');
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  const el = document.getElementById('page-' + page);
+  if(el) el.classList.remove('hidden');
+  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+  document.getElementById('crumb').textContent = TITLES[page][0];
+  document.getElementById('pageTitle').textContent = TITLES[page][1];
+  document.getElementById('sidebar').classList.remove('open');
+
+  if(page === 'home')    renderHome();
+  if(page === 'prep')    renderPrep();
+  if(page === 'entry')   { document.getElementById('entryLock').innerHTML=''; document.getElementById('entryWrap').classList.remove('hidden'); }
+  if(page === 'records') { renderRecords(); drawChart(); }
+  if(page === 'report')  renderReportSummary();
+  if(page === 'data')    renderDataStats();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('#nav a').forEach(a =>
+  a.addEventListener('click', () => go(a.dataset.page)));
+
+/* HELPERS */
+function sortedRecords(){ return state.records.slice().sort((a,b) => (a.date||'').localeCompare(b.date||'')); }
+function fmtDate(d){ if(!d) return '—'; const [y,m,dd] = d.split('-'); return `${dd}.${m}.${y}`; }
+function avgOf(arr, key){
+  const v = arr.map(r => parseFloat(r[key])).filter(n => !isNaN(n));
+  if(!v.length) return '—';
+  return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1);
+}
+function colorBadge(c){
+  if(!c) return '<span style="color:#B9B4A6">—</span>';
+  let cls = 'b-kontrol';
+  if(/Yeşil|yeşil|Sarı/.test(c)) cls = 'b-deney';
+  if(/Nohut/.test(c)) cls = 'b-nohut';
+  if(/Yok/.test(c)) cls = 'b-warn';
+  return `<span class="badge ${cls}">${c}</span>`;
+}
+function groupBadge(g){
+  return g === 'deney'
+    ? '<span class="badge b-deney">🧪 Deney</span>'
+    : '<span class="badge b-kontrol">⚖️ Kontrol</span>';
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function photoCell(p, id){
+  if(!p) return '<span style="color:#B9B4A6;font-size:11px">—</span>';
+  return `<img class="thumb" src="${p}" onclick="openModal('${id}')" alt="foto">`;
+}
+
+/* LOCKS */
+function updateLocks(){
+  const done = !!state.prep?.completed;
+  document.getElementById('lockPrep').textContent  = done ? '✅' : '🔓';
+  document.getElementById('lockEntry').textContent = done ? '🔓' : '🔒';
+}
+
+/* ============ HOME ============ */
+function renderHome(){
+  const recs = sortedRecords();
+  const deneyR = recs.filter(r => r.group === 'deney');
+  const kontrolR = recs.filter(r => r.group === 'kontrol');
+
+  // banner
+  const pb = document.getElementById('prepBanner');
+  if(!state.prep?.completed){
+    pb.innerHTML = `<div class="notice warn">
+      🧪 Henüz <b>Ön Hazırlık</b> tamamlanmadı. Günlük ölçümlere başlamak için önce deney düzeneğini kurun.
+      <div style="margin-top:12px"><button class="btn btn-primary btn-sm" onclick="go('prep')">Ön Hazırlığa Başla →</button></div>
+    </div>`;
+  } else {
+    pb.innerHTML = `<div class="notice info">
+      ✅ Ön hazırlık tamamlandı (<b>${fmtDate(state.prep.date)}</b>).
+      Deney: <b>${escapeHtml(state.prep.expName)}</b> • Kontrol: <b>${escapeHtml(state.prep.ctlName)}</b>
+    </div>`;
+  }
+
+  document.getElementById('homeStats').innerHTML = `
+    <div class="stat s1"><div class="lbl">Deney Grubu Ölçüm</div><div class="val">${deneyR.length} <small>gün</small></div></div>
+    <div class="stat s2"><div class="lbl">Kontrol Grubu Ölçüm</div><div class="val">${kontrolR.length} <small>gün</small></div></div>
+    <div class="stat s3"><div class="lbl">Deney Ort. Çap</div><div class="val">${avgOf(deneyR,'grow')} <small>mm</small></div></div>
+    <div class="stat s4"><div class="lbl">Kontrol Ort. Çap</div><div class="val">${avgOf(kontrolR,'grow')} <small>mm</small></div></div>`;
+
+  const recent = recs.slice(-6).reverse();
+  const box = document.getElementById('homeRecent');
+  if(!recent.length){
+    box.innerHTML = `<div class="empty"><div class="big">🧫</div>Henüz ölçüm kaydı yok.<br>
+      <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="go('entry')">İlk Ölçümü Ekle</button></div>`;
+  } else {
+    box.innerHTML = recent.map(r => `
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #F0EDE5">
+        ${r.photo ? `<img src="${r.photo}" class="thumb" onclick="openModal('${r.id}')">`
+                  : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:#F1EFE7;color:#B9B4A6">—</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:var(--kuf-deep);display:flex;gap:8px;align-items:center">
+            ${fmtDate(r.date)} ${groupBadge(r.group)}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">
+            🌡️ ${r.temp}°C &nbsp; 💧 ${r.hum}% &nbsp; ⚗️ pH ${r.ph}
+            ${r.grow ? ` &nbsp; 📈 ${r.grow} mm` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+/* ============ PREP ============ */
+function renderChecklist(){
+  const el = document.getElementById('checklist');
+  el.innerHTML = CHECK_ITEMS.map(c => `
+    <label class="check-item ${state.prepChecks[c.k] ? 'checked' : ''}" data-key="${c.k}">
+      <input type="checkbox" ${state.prepChecks[c.k] ? 'checked' : ''} onchange="toggleCheck('${c.k}', this.checked)">
+      <span class="box"></span>
+      <span class="emoji">${c.e}</span>
+      <span>${c.t}</span>
+    </label>`).join('');
+}
+function toggleCheck(k, on){
+  state.prepChecks[k] = on;
+  document.querySelectorAll(`.check-item[data-key="${k}"]`).forEach(el =>
+    el.classList.toggle('checked', on));
+}
+
+function fillPrepForm(p){
+  document.getElementById('pTitle').value = p.title || '';
+  document.getElementById('pDate').value  = p.date || '';
+  document.getElementById('pTemp').value  = p.temp || '';
+  document.getElementById('pHum').value   = p.hum || '';
+  document.getElementById('pPh').value    = p.ph || '';
+  document.getElementById('pHypo').value  = p.hypo || '';
+  document.getElementById('pExpName').value = p.expName || 'Deney Grubu';
+  document.getElementById('pExpDesc').value = p.expDesc || '';
+  document.getElementById('pCtlName').value = p.ctlName || 'Kontrol Grubu';
+  document.getElementById('pCtlDesc').value = p.ctlDesc || '';
+  document.getElementById('pNotes').value   = p.notes || '';
+  state.prepChecks = p.checks || {};
+  renderChecklist();
+  if(p.photo){
+    state.pendingPrepPhoto = p.photo;
+    const prev = document.getElementById('pPhotoPreview');
+    prev.src = p.photo; prev.classList.remove('hidden');
+    document.getElementById('pPhotoName').textContent = '✓ Mevcut düzenek fotoğrafı';
+  }
+}
+
+function handlePrepPhoto(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const rd = new FileReader();
+  rd.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 800, sc = Math.min(1, maxW/img.width);
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      state.pendingPrepPhoto = c.toDataURL('image/jpeg', 0.78);
+      const prev = document.getElementById('pPhotoPreview');
+      prev.src = state.pendingPrepPhoto; prev.classList.remove('hidden');
+      document.getElementById('pPhotoName').textContent = '✓ ' + file.name;
+    };
+    img.src = e.target.result;
+  };
+  rd.readAsDataURL(file);
+}
+
+function savePrep(ev){
+  ev.preventDefault();
+  const checks = {};
+  CHECK_ITEMS.forEach(c => { if(state.prepChecks[c.k]) checks[c.k] = true; });
+
+  state.prep = {
+    completed: true,
+    title: document.getElementById('pTitle').value.trim(),
+    date:  document.getElementById('pDate').value,
+    temp:  document.getElementById('pTemp').value,
+    hum:   document.getElementById('pHum').value,
+    ph:    document.getElementById('pPh').value,
+    hypo:  document.getElementById('pHypo').value.trim(),
+    expName: document.getElementById('pExpName').value.trim() || 'Deney Grubu',
+    expDesc: document.getElementById('pExpDesc').value.trim(),
+    ctlName: document.getElementById('pCtlName').value.trim() || 'Kontrol Grubu',
+    ctlDesc: document.getElementById('pCtlDesc').value.trim(),
+    notes: document.getElementById('pNotes').value.trim(),
+    checks: checks,
+    photo: state.pendingPrepPhoto || null,
+    savedAt: new Date().toISOString()
+  };
+  persistPrep();
+  updateLocks();
+  applyPrepToEntry();
+  showToast('✅ Ön hazırlık tamamlandı — günlük ölçüm kilidi açıldı.');
+  go('entry');
+}
+
+function resetPrepForm(){
+  document.getElementById('prepForm').reset();
+  state.prepChecks = {};
+  state.pendingPrepPhoto = null;
+  document.getElementById('pPhotoPreview').classList.add('hidden');
+  document.getElementById('pPhotoName').textContent = '';
+  document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+  renderChecklist();
+}
+
+function renderPrep(){
+  const s = document.getElementById('prepStatus');
+  if(state.prep?.completed){
+    const ck = CHECK_ITEMS.filter(c => state.prep.checks?.[c.k]);
+    s.innerHTML = `<div class="card" style="background:linear-gradient(135deg,#F6FAF1,#EDF5E1);border-color:var(--yesil-light)">
+      <div class="card-title" style="margin-bottom:10px">✅ Ön Hazırlık Tamamlandı</div>
+      <div style="font-size:13.5px;line-height:2;color:#3E5530">
+        <b>Başlık:</b> ${escapeHtml(state.prep.title)}<br>
+        <b>Başlangıç:</b> ${fmtDate(state.prep.date)} &nbsp;•&nbsp;
+        <b>Hedef:</b> ${state.prep.temp||'—'} °C / %${state.prep.hum||'—'} / pH ${state.prep.ph||'—'}<br>
+        <b>Tamamlanan Adım:</b> ${ck.length} / ${CHECK_ITEMS.length}
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="go('entry')">📝 Günlük Ölçüme Git</button>
+        <button class="btn btn-ghost btn-sm" onclick="go('report')">📄 Raporu Gör</button>
+      </div>
+    </div>`;
+  } else {
+    s.innerHTML = `<div class="notice warn">📋 Aşağıdaki formu doldurup kaydederek ön hazırlığı tamamlayın. Günlük ölçümler bu adımdan sonra açılır.</div>`;
+  }
+}
+
+/* ============ ENTRY ============ */
+function applyPrepToEntry(){
+  if(!state.prep) return;
+  document.getElementById('grpDeneyName').textContent  = state.prep.expName || 'Deney Grubu';
+  document.getElementById('grpDeneyDesc').textContent  = state.prep.expDesc || 'Penicillium ekili grup';
+  document.getElementById('grpKontrolName').textContent = state.prep.ctlName || 'Kontrol Grubu';
+  document.getElementById('grpKontrolDesc').textContent = state.prep.ctlDesc || 'Steril referans grup';
+}
+
+function selectGroup(g){
+  state.activeGroup = g;
+  document.getElementById('grpDeney').classList.toggle('on', g === 'deney');
+  document.getElementById('grpKontrol').classList.toggle('on', g === 'kontrol');
+  document.getElementById('recGroup').value = g;
+  const name = g === 'deney'
+    ? (state.prep?.expName || 'Deney Grubu')
+    : (state.prep?.ctlName || 'Kontrol Grubu');
+  document.getElementById('entryFormTitle').textContent = `Günlük Ölçüm Formu — ${name}`;
+}
+
+function handlePhoto(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const rd = new FileReader();
+  rd.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 700, sc = Math.min(1, maxW/img.width);
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      state.pendingPhoto = c.toDataURL('image/jpeg', 0.78);
+      const prev = document.getElementById('photoPreview');
+      prev.src = state.pendingPhoto; prev.classList.remove('hidden');
+      document.getElementById('photoName').textContent = '✓ ' + file.name;
+    };
+    img.src = e.target.result;
+  };
+  rd.readAsDataURL(file);
+}
+
+function saveRecord(ev){
+  ev.preventDefault();
+  const id = document.getElementById('recId').value;
+  const group = document.getElementById('recGroup').value;
+
+  const data = {
+    group: group,
+    date:  document.getElementById('fDate').value,
+    temp:  document.getElementById('fTemp').value,
+    hum:   document.getElementById('fHum').value,
+    ph:    document.getElementById('fPh').value,
+    grow:  document.getElementById('fGrow').value,
+    color: document.getElementById('fColor').value,
+    note:  document.getElementById('fNote').value.trim(),
+    photo: state.pendingPhoto || null,
+    user:  'Yönetici'
+  };
+
+  if(id){
+    const i = state.records.findIndex(r => r.id === id);
+    if(i > -1){
+      if(!data.photo) data.photo = state.records[i].photo;
+      state.records[i] = { ...state.records[i], ...data };
+    }
+  } else {
+    state.records.push({ id: uid(), created: new Date().toISOString(), ...data });
+  }
+  persistRecords();
+  resetForm();
+  showToast(id ? '✅ Ölçüm güncellendi.' : '✅ Ölçüm kaydedildi.');
+  go('records');
+}
+
+function resetForm(){
+  document.getElementById('entryForm').reset();
+  document.getElementById('recId').value = '';
+  document.getElementById('recGroup').value = state.activeGroup;
+  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  state.pendingPhoto = null;
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoName').textContent = '';
+}
+
+function editRecord(id){
+  const r = state.records.find(x => x.id === id); if(!r) return;
+  document.getElementById('recId').value = r.id;
+  document.getElementById('recGroup').value = r.group;
+  document.getElementById('fDate').value  = r.date || '';
+  document.getElementById('fTemp').value  = r.temp || '';
+  document.getElementById('fHum').value   = r.hum || '';
+  document.getElementById('fPh').value    = r.ph || '';
+  document.getElementById('fGrow').value  = r.grow || '';
+  document.getElementById('fColor').value = r.color || 'Yeşil';
+  document.getElementById('fNote').value  = r.note || '';
+  state.pendingPhoto = r.photo || null;
+  const prev = document.getElementById('photoPreview');
+  if(r.photo){ prev.src = r.photo; prev.classList.remove('hidden'); }
+  else { prev.classList.add('hidden'); prev.src = ''; }
+  document.getElementById('photoName').textContent = r.photo ? '✓ Mevcut fotoğraf' : '';
+  selectGroup(r.group);
+  go('entry');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteRecord(id){
+  if(!confirm('Bu ölçüm kaydını silmek istediğinize emin misiniz?')) return;
+  state.records = state.records.filter(r => r.id !== id);
+  persistRecords();
+  renderRecords(); drawChart(); renderDataStats();
+  showToast('🗑️ Kayıt silindi.');
+}
+
+/* ============ RECORDS ============ */
+document.getElementById('groupFilter').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#groupFilter button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  state.filter = b.dataset.g;
+  renderRecords();
+});
+
+function renderRecords(){
+  let recs = sortedRecords().reverse();
+  if(state.filter !== 'all') recs = recs.filter(r => r.group === state.filter);
+  const body = document.getElementById('recordsBody');
+
+  if(!recs.length){
+    body.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="big">📊</div>Kayıt bulunmuyor.</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = recs.map(r => `
+    <tr>
+      <td style="font-weight:700;white-space:nowrap">${fmtDate(r.date)}</td>
+      <td>${groupBadge(r.group)}</td>
+      <td>${r.temp ?? '—'} °C</td>
+      <td>${r.hum ?? '—'} %</td>
+      <td>${r.ph ?? '—'}</td>
+      <td>${colorBadge(r.color)}</td>
+      <td>${r.grow ? r.grow + ' mm' : '—'}</td>
+      <td style="max-width:200px;font-size:12px;color:var(--muted)">${r.note ? escapeHtml(r.note) : '—'}</td>
+      <td>${photoCell(r.photo, r.id)}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editRecord('${r.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+/* ============ CHART ============ */
+document.getElementById('metricSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#metricSeg button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  state.metric = b.dataset.m;
+  drawChart();
+});
+
+function drawChart(){
+  const canvas = document.getElementById('chart'); if(!canvas) return;
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const key = state.metric;
+  const labels = { temp:'Sıcaklık (°C)', hum:'Nem (%)', ph:'pH', grow:'Koloni Çapı (mm)' };
+
+  const recs = sortedRecords();
+  if(!recs.length){
+    ctx.fillStyle = '#B9B4A6'; ctx.font = '600 13px Segoe UI, sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Grafik için en az bir ölçüm kaydı gerekli.', W/2, H/2);
+    return;
+  }
+
+  const dates = [...new Set(recs.map(r => r.date))].sort();
+  const deneyPts = dates.map(d => {
+    const r = recs.find(x => x.date===d && x.group==='deney');
+    return r ? parseFloat(r[key]) : null;
+  });
+  const kontrolPts = dates.map(d => {
+    const r = recs.find(x => x.date===d && x.group==='kontrol');
+    return r ? parseFloat(r[key]) : null;
+  });
+
+  const allVals = [...deneyPts, ...kontrolPts].filter(v => v !== null && !isNaN(v));
+  if(!allVals.length){
+    ctx.fillStyle = '#B9B4A6'; ctx.font = '600 13px Segoe UI, sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Bu metrik için veri bulunmuyor.', W/2, H/2);
+    return;
+  }
+
+  let min = Math.min(...allVals), max = Math.max(...allVals);
+  if(max === min){ max += 1; min -= 1; }
+  const span = max - min;
+  min -= span*0.15; max += span*0.15;
+
+  const padL = 52, padR = 22, padT = 22, padB = 46;
+  const cw = W - padL - padR, ch = H - padT - padB;
+  const X = i => padL + (dates.length === 1 ? cw/2 : (i/(dates.length-1))*cw);
+  const Y = v => padT + ch - ((v - min)/(max - min))*ch;
+
+  // grid
+  ctx.strokeStyle = '#EDEAE1'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#9AA5A3'; ctx.font = '600 10.5px Segoe UI, sans-serif'; ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const y = padT + (ch/4)*i;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+cw,y); ctx.stroke();
+    ctx.fillText((max - ((max-min)/4)*i).toFixed(1), padL-9, y+4);
+  }
+
+  // helper: draw series
+  function drawSeries(pts, color){
+    // area
+    const segments = [];
+    let cur = [];
+    pts.forEach((v,i) => {
+      if(v !== null && !isNaN(v)) cur.push({x:X(i), y:Y(v)});
+      else { if(cur.length) segments.push(cur); cur = []; }
+    });
+    if(cur.length) segments.push(cur);
+
+    segments.forEach(seg => {
+      const g = ctx.createLinearGradient(0,padT,0,padT+ch);
+      g.addColorStop(0, color + '44');
+      g.addColorStop(1, color + '05');
+      ctx.beginPath();
+      ctx.moveTo(seg[0].x, padT+ch);
+      seg.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(seg[seg.length-1].x, padT+ch);
+      ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+
+      ctx.beginPath();
+      seg.forEach((p,i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+      ctx.strokeStyle = color; ctx.lineWidth = 3;
+      ctx.lineJoin='round'; ctx.lineCap='round';
+      ctx.shadowColor = color + '66'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+      ctx.stroke(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      seg.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4.5, 0, Math.PI*2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = color; ctx.lineWidth = 2.6; ctx.stroke();
+      });
+    });
+  }
+
+  drawSeries(kontrolPts, '#7C8B8B');
+  drawSeries(deneyPts,   '#7FA65A');
+
+  // x labels
+  ctx.fillStyle = '#9AA5A3'; ctx.font = '600 10px Segoe UI, sans-serif'; ctx.textAlign='center';
+  const step = Math.max(1, Math.ceil(dates.length/7));
+  dates.forEach((d,i) => {
+    if(i % step === 0 || i === dates.length-1){
+      const [y,m,dd] = (d||'').split('-');
+      ctx.fillText(`${dd}.${m}`, X(i), padT+ch+20);
+    }
+  });
+
+  // title
+  ctx.fillStyle = '#4A5654'; ctx.font = '800 12px Segoe UI, sans-serif'; ctx.textAlign='left';
+  ctx.fillText(labels[key], padL, 12);
+}
+
+window.addEventListener('resize', () => {
+  if(!document.getElementById('page-records').classList.contains('hidden')) drawChart();
+});
+
+/* ============ DATA ============ */
+function renderDataStats(){
+  const recs = state.records;
+  const deneyR = recs.filter(r => r.group==='deney').length;
+  const kontrolR = recs.filter(r => r.group==='kontrol').length;
+  const withPhoto = recs.filter(r => r.photo).length;
+  document.getElementById('dataStats').innerHTML = `
+    <div class="stat s1"><div class="lbl">Toplam Kayıt</div><div class="val">${recs.length}</div></div>
+    <div class="stat s2"><div class="lbl">Deney Grubu</div><div class="val">${deneyR}</div></div>
+    <div class="stat s3"><div class="lbl">Kontrol Grubu</div><div class="val">${kontrolR}</div></div>
+    <div class="stat s4"><div class="lbl">Fotoğraflı</div><div class="val">${withPhoto}</div></div>`;
+}
+function backupJSON(){
+  const data = { prep: state.prep, records: state.records, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'penicillium_yedek_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('💾 Yedek indirildi.');
+}
+function restoreJSON(ev){
+  const f = ev.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || typeof data !== 'object') throw 0;
+      if(!confirm('Mevcut veriler yedekle değiştirilecek. Onaylıyor musunuz?')) return;
+      state.prep = data.prep || null;
+      state.records = Array.isArray(data.records) ? data.records : [];
+      persistPrep(); persistRecords();
+      state.prepChecks = state.prep?.checks || {};
+      if(state.prep) fillPrepForm(state.prep);
+      updateLocks(); renderHome(); renderDataStats(); renderRecords(); drawChart();
+      showToast('📂 Veriler geri yüklendi.');
+    }catch(err){ alert('Geçersiz yedek dosyası.'); }
+  };
+  rd.readAsText(f);
+}
+function clearRecords(){
+  if(!confirm('Tüm ölçüm kayıtları silinecek. Emin misiniz?')) return;
+  state.records = []; persistRecords();
+  renderDataStats(); renderRecords(); drawChart(); renderHome();
+  showToast('🗑️ Kayıtlar silindi.');
+}
+function clearAll(){
+  if(!confirm('Tüm sistem sıfırlanacak: ön hazırlık + kayıtlar. Emin misiniz?')) return;
+  if(!confirm('Bu işlem geri alınamaz! Son onay?')) return;
+  state.records = []; state.prep = null; state.prepChecks = {}; state.pendingPrepPhoto = null;
+  persistRecords(); persistPrep();
+  document.getElementById('prepForm').reset();
+  document.getElementById('pPhotoPreview').classList.add('hidden');
+  document.getElementById('pPhotoName').textContent = '';
+  renderChecklist(); updateLocks(); renderHome(); renderDataStats();
+  showToast('⚠️ Sistem sıfırlandı.');
+}
+
+/* ============ REPORT SUMMARY ============ */
+function renderReportSummary(){
+  const recs = sortedRecords();
+  if(!recs.length){
+    document.getElementById('reportSummary').innerHTML =
+      '<div style="color:var(--muted)">Rapor oluşturmak için önce ölçüm kaydı eklemelisiniz.</div>';
+    return;
+  }
+  const deneyR = recs.filter(r => r.group==='deney');
+  const kontrolR = recs.filter(r => r.group==='kontrol');
+  const p = state.prep || {};
+  document.getElementById('reportSummary').innerHTML = `
+    <div>🧪 <b>Deney:</b> ${escapeHtml(p.title || '—')}</div>
+    <div>📅 <b>Başlangıç:</b> ${p.date ? fmtDate(p.date) : '—'}</div>
+    <div>🧬 <b>Deney Grubu:</b> ${deneyR.length} ölçüm • ort. çap ${avgOf(deneyR,'grow')} mm</div>
+    <div>⚖️ <b>Kontrol Grubu:</b> ${kontrolR.length} ölçüm • ort. çap ${avgOf(kontrolR,'grow')} mm</div>
+    <div>🌡️ <b>Deney ort. sıcaklık:</b> ${avgOf(deneyR,'temp')} °C</div>
+    <div>💧 <b>Deney ort. nem:</b> ${avgOf(deneyR,'hum')} %</div>
+    <div>⚗️ <b>Deney ort. pH:</b> ${avgOf(deneyR,'ph')}</div>
+    <div>📸 <b>Fotoğraflı kayıt:</b> ${recs.filter(r=>r.photo).length} adet</div>`;
+}
+
+/* ============ PDF ============ */
+function pdfSafe(s){
+  return String(s ?? '')
+    .replace(/ş/g,'s').replace(/Ş/g,'S').replace(/ğ/g,'g').replace(/Ğ/g,'G')
+    .replace(/ı/g,'i').replace(/İ/g,'I').replace(/ç/g,'c').replace(/Ç/g,'C')
+    .replace(/ö/g,'o').replace(/Ö/g,'O').replace(/ü/g,'u').replace(/Ü/g,'U');
+}
+
+function exportPDF(){
+  const recs = sortedRecords();
+  if(!recs.length){ alert('Rapor oluşturmak için önce ölçüm kaydı eklemelisiniz.'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  const PW = doc.internal.pageSize.getWidth();
+  const PH = doc.internal.pageSize.getHeight();
+  const now = new Date();
+  const p = state.prep || {};
+
+  /* COVER */
+  doc.setFillColor(46,58,60); doc.rect(0,0,PW,50,'F');
+  doc.setFillColor(127,166,90); doc.rect(0,50,PW,3,'F');
+
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
+  doc.text('PENICILLIUM DENEYI', 14, 22);
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(200,215,195);
+  doc.text(pdfSafe(p.title || 'Deney & Kontrol Grubu Karsilastirmali Rapor'), 14, 32);
+
+  doc.setFontSize(9); doc.setTextColor(170,190,165);
+  doc.text('Rapor Tarihi: ' + now.toLocaleDateString('tr-TR') + '  |  Hazirlayan: Yonetici', 14, 44);
+
+  let y = 62;
+
+  /* HYPOTHESIS + PREP */
+  doc.setTextColor(46,58,60); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Deney Bilgileri', 14, y); y += 7;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60,70,68);
+  const hypoLines = doc.splitTextToSize('Hipotez: ' + pdfSafe(p.hypo || '-'), PW - 28);
+  doc.text(hypoLines, 14, y); y += hypoLines.length * 4.5 + 4;
+
+  const info = [
+    ['Baslangic Tarihi', p.date ? fmtDate(p.date) : '-'],
+    ['Hedef Sicaklik', (p.temp || '-') + ' C'],
+    ['Hedef Nem', (p.hum || '-') + ' %'],
+    ['Hedef pH', p.ph || '-']
+  ];
+  info.forEach(it => {
+    doc.setFont('helvetica','bold'); doc.setTextColor(122,139,139); doc.setFontSize(8.5);
+    doc.text(pdfSafe(it[0]) + ':', 14, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(46,58,60);
+    doc.text(pdfSafe(it[1]), 55, y);
+    y += 5.5;
+  });
+  y += 3;
+
+  /* GROUPS */
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
+  doc.text('Grup Tanimlari', 14, y); y += 7;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60,70,68);
+  doc.text('Deney Grubu: ' + pdfSafe(p.expName || 'Deney Grubu'), 14, y); y += 5;
+  const d1 = doc.splitTextToSize(pdfSafe(p.expDesc || '-'), PW - 28);
+  doc.text(d1, 14, y); y += d1.length*4.5 + 3;
+
+  doc.text('Kontrol Grubu: ' + pdfSafe(p.ctlName || 'Kontrol Grubu'), 14, y); y += 5;
+  const d2 = doc.splitTextToSize(pdfSafe(p.ctlDesc || '-'), PW - 28);
+  doc.text(d2, 14, y); y += d2.length*4.5 + 6;
+
+  /* CHECKLIST */
+  if(p.checks && Object.keys(p.checks).length){
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(46,58,60);
+    doc.text('Tamamlanan Hazirlik Adimlari', 14, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    CHECK_ITEMS.filter(c => p.checks[c.k]).forEach(c => {
+      if(y > PH - 20){ doc.addPage(); y = 20; }
+      doc.setTextColor(85,122,54); doc.text('[x]', 14, y);
+      doc.setTextColor(60,70,68); doc.text(pdfSafe(c.t), 22, y);
+      y += 4.8;
+    });
+    y += 4;
+  }
+
+  /* SETUP PHOTO */
+  if(p.photo){
+    if(y > PH - 90){ doc.addPage(); y = 20; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(46,58,60);
+    doc.text('Deney Duzenegi Fotografi', 14, y); y += 5;
+    try{
+      const imgW = 110, imgH = 82;
+      doc.addImage(p.photo, 'JPEG', 14, y, imgW, imgH, undefined, 'FAST');
+      doc.setDrawColor(216,201,163); doc.setLineWidth(0.4);
+      doc.rect(14, y, imgW, imgH);
+      y += imgH + 8;
+    }catch(e){ y += 6; }
+  }
+
+  /* STATS BOXES */
+  const deneyR = recs.filter(r => r.group==='deney');
+  const kontrolR = recs.filter(r => r.group==='kontrol');
+
+  if(y > PH - 50){ doc.addPage(); y = 20; }
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
+  doc.text('Ozet Istatistikler', 14, y); y += 7;
+
+  const boxes = [
+    ['Deney Kayit', deneyR.length + ' gun'],
+    ['Kontrol Kayit', kontrolR.length + ' gun'],
+    ['Deney Ort. Cap', avgOf(deneyR,'grow') + ' mm'],
+    ['Kontrol Ort. Cap', avgOf(kontrolR,'grow') + ' mm']
+  ];
+  const bw = (PW - 28 - 3*4) / 4;
+  boxes.forEach((b,i) => {
+    const x = 14 + i*(bw+4);
+    doc.setFillColor(243,241,234);
+    doc.roundedRect(x, y, bw, 22, 2.5, 2.5, 'F');
+    doc.setDrawColor(216,201,163); doc.setLineWidth(0.3);
+    doc.roundedRect(x, y, bw, 22, 2.5, 2.5, 'S');
+    doc.setTextColor(122,139,139); doc.setFont('helvetica','bold'); doc.setFontSize(6.8);
+    doc.text(pdfSafe(b[0]).toUpperCase(), x + bw/2, y + 8, {align:'center'});
+    doc.setTextColor(46,58,60); doc.setFontSize(11);
+    doc.text(pdfSafe(b[1]), x + bw/2, y + 17, {align:'center'});
+  });
+  y += 30;
+
+  /* TABLE */
+  if(y > PH - 60){ doc.addPage(); y = 20; }
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
+  doc.text('Gunluk Olcum Tablosu', 14, y);
+  y += 4;
+
+  const rows = recs.map(r => [
+    pdfSafe(fmtDate(r.date)),
+    r.group === 'deney' ? 'Deney' : 'Kontrol',
+    r.temp != null ? r.temp : '-',
+    r.hum  != null ? r.hum  : '-',
+    r.ph   != null ? r.ph   : '-',
+    pdfSafe(r.color || '-'),
+    r.grow ? r.grow + ' mm' : '-',
+    pdfSafe((r.note || '-').substring(0, 50))
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['Tarih','Grup','Sic. (C)','Nem (%)','pH','Renk','Cap','Gozlem']],
+    body: rows,
+    theme: 'grid',
+    styles: { font:'helvetica', fontSize:7.8, cellPadding:2.4, textColor:[45,55,53], lineColor:[226,222,210], lineWidth:0.2 },
+    headStyles: { fillColor:[127,166,90], textColor:[255,255,255], fontStyle:'bold', fontSize:7.6, halign:'center' },
+    alternateRowStyles: { fillColor:[250,249,244] },
+    columnStyles: {
+      0:{cellWidth:18, fontStyle:'bold'},
+      1:{cellWidth:16, halign:'center'},
+      2:{cellWidth:15, halign:'center'},
+      3:{cellWidth:15, halign:'center'},
+      4:{cellWidth:12, halign:'center'},
+      5:{cellWidth:22, halign:'center'},
+      6:{cellWidth:17, halign:'center'},
+      7:{cellWidth:'auto'}
+    },
+    margin: {left:14, right:14},
+    didParseCell: (data) => {
+      if(data.section === 'body' && data.column.index === 1){
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.textColor = data.cell.raw === 'Deney' ? [85,122,54] : [70,85,90];
+      }
+    }
+  });
+
+  /* PHOTOS */
+  const withPhoto = recs.filter(r => r.photo);
+  if(withPhoto.length){
+    doc.addPage();
+    doc.setFillColor(46,58,60); doc.rect(0,0,PW,18,'F');
+    doc.setFillColor(127,166,90); doc.rect(0,18,PW,2,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('Gelisim Fotograflari', 14, 12);
+
+    let x = 14, yy = 28, imgW = 86, imgH = 68, gap = 8, col = 0;
+
+    withPhoto.forEach(r => {
+      if(yy + imgH + 14 > PH - 14){ doc.addPage(); yy = 20; x = 14; col = 0; }
+      try{ doc.addImage(r.photo, 'JPEG', x, yy, imgW, imgH, undefined, 'FAST'); }catch(e){}
+      doc.setDrawColor(216,201,163); doc.setLineWidth(0.4);
+      doc.rect(x, yy, imgW, imgH);
+
+      doc.setTextColor(46,58,60); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+      const lbl = pdfSafe(fmtDate(r.date)) + '  |  ' +
+                  (r.group === 'deney' ? 'DENEY' : 'KONTROL') + '  |  ' +
+                  r.temp + ' C  |  pH ' + r.ph;
+      doc.text(lbl, x, yy + imgH + 5);
+
+      col++;
+      if(col % 2 === 0){ x = 14; yy += imgH + 14; }
+      else { x = 14 + imgW + gap; }
+    });
+  }
+
+  /* PAGE NUMBERS */
+  const pages = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(150,160,158);
+    doc.text('Penicillium Deney Takip Sistemi  •  Bilimsel Rapor', 14, PH - 8);
+    doc.text('Sayfa ' + i + ' / ' + pages, PW - 14, PH - 8, {align:'right'});
+  }
+
+  doc.save('Penicillium_Rapor_' + now.toISOString().slice(0,10) + '.pdf');
+  showToast('📄 PDF raporu indirildi.');
+}
+
+/* ============ MODAL / TOAST ============ */
+function openModal(id){
+  const r = state.records.find(x => x.id === id); if(!r || !r.photo) return;
+  document.getElementById('modalImg').src = r.photo;
+  document.getElementById('imgModal').classList.remove('hidden');
+}
+function closeModal(){ document.getElementById('imgModal').classList.add('hidden'); }
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeModal();
+  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) doLogin();
+});
+
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#2E3A3C;color:#fff;padding:13px 26px;border-radius:12px;font-size:13.5px;
+    font-weight:600;box-shadow:0 12px 34px rgba(0,0,0,.3);z-index:5000;opacity:0;
+    transition:.28s;font-family:inherit;border-left:4px solid #7FA65A;`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => {
+    t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  setTimeout(() => {
+    t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => t.remove(), 300);
+  }, 2400);
+}
+
+/* ============ INIT ============ */
+(function init(){
+  loadAll();
+  renderChecklist();
+  const ses = localStorage.getItem(LS_SES);
+  if(ses){
+    try{ state.user = JSON.parse(ses); startApp(); }
+    catch(e){ localStorage.removeItem(LS_SES); }
+  }
+  document.getElementById('loginPass').focus();
+})();
+</script>
+</body>
+</html>
