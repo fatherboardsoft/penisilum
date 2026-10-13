@@ -134,7 +134,14 @@ tbody tr:hover{background:#FAF9F4}
 .photo-drop{border:2px dashed var(--line);border-radius:13px;padding:22px;text-align:center;cursor:pointer;transition:.2s;background:#FCFBF6}
 .photo-drop:hover{border-color:var(--yesil);background:#F7FAF1}
 .photo-drop input{display:none}
-.preview{max-width:190px;border-radius:12px;margin-top:14px;border:3px solid #fff;box-shadow:var(--shadow)}
+.preview{max-width:150px;max-height:150px;border-radius:12px;margin-top:14px;border:3px solid #fff;box-shadow:var(--shadow);object-fit:cover}
+.photo-grid{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;justify-content:center}
+.photo-item{position:relative;display:inline-block}
+.photo-item img{width:130px;height:130px;object-fit:cover;border-radius:12px;border:3px solid #fff;box-shadow:var(--shadow);display:block}
+.photo-del{position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;border:none;
+  background:var(--danger);color:#fff;font-weight:900;cursor:pointer;font-size:15px;line-height:1;
+  box-shadow:0 4px 10px rgba(192,87,75,.5);display:flex;align-items:center;justify-content:center;transition:.15s}
+.photo-del:hover{transform:scale(1.12);background:#A0402F}
 .actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:22px}
 
 /* GROUP TOGGLE */
@@ -177,11 +184,17 @@ canvas{width:100%;height:100%;display:block}
 .legend .dot{width:11px;height:11px;border-radius:50%}
 
 /* MODAL */
-.modal{position:fixed;inset:0;background:rgba(35,45,45,.78);backdrop-filter:blur(4px);display:flex;align-items:center;
+.modal{position:fixed;inset:0;background:rgba(35,45,45,.82);backdrop-filter:blur(4px);display:flex;align-items:center;
   justify-content:center;z-index:2000;padding:24px}
-.modal img{max-width:90vw;max-height:85vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal img{max-width:80vw;max-height:78vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#111}
 .modal .close{position:absolute;top:20px;right:24px;background:#fff;border:none;width:42px;height:42px;border-radius:50%;
-  font-size:20px;cursor:pointer;color:var(--kuf-deep);font-weight:700}
+  font-size:20px;cursor:pointer;color:var(--kuf-deep);font-weight:700;z-index:10}
+.modal-nav{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;
+  background:rgba(255,255,255,.95);padding:10px 18px;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.modal-nav button{background:var(--yesil);color:#fff;border:none;width:38px;height:38px;border-radius:50%;
+  font-size:18px;cursor:pointer;font-weight:800;display:flex;align-items:center;justify-content:center;transition:.15s}
+.modal-nav button:hover{transform:scale(1.08);background:var(--yesil-dark)}
+.modal-nav .counter{font-weight:800;color:var(--kuf-deep);font-size:14px;min-width:60px;text-align:center}
 
 .notice{padding:14px 18px;border-radius:12px;font-size:13px;line-height:1.7;margin-bottom:18px;border-left:4px solid}
 .notice.info{background:#EFF4EA;border-color:var(--yesil);color:#4A6432}
@@ -263,7 +276,7 @@ canvas{width:100%;height:100%;display:block}
 
     <div class="content">
 
-      <!-- ============ HOME ============ -->
+      <!-- HOME -->
       <div class="page" id="page-home">
         <div class="hero">
           <h1>🧫 Penicillium Deneyi — Bilimsel Gözlem Günlüğü</h1>
@@ -271,8 +284,7 @@ canvas{width:100%;height:100%;display:block}
             Bu platform, <b>Penicillium</b> küf mantarının <b>deney grubu</b> ve <b>kontrol grubu</b>
             üzerindeki gelişimini karşılaştırmalı olarak izlemek için tasarlanmış
             <b>bilimsel bir deney takip sistemidir</b>. Sıcaklık, nem, pH ve koloni gelişimi
-            düzenli olarak ölçülür; fotoğraflarla belgelenir. Toplanan veriler hipotez testi,
-            değişken analizi ve bilimsel raporlamada kullanılır.
+            düzenli olarak ölçülür; fotoğraflarla belgelenir.
           </p>
           <div class="tags">
             <span class="tag">🔬 Kontrollü Deney</span>
@@ -285,7 +297,6 @@ canvas{width:100%;height:100%;display:block}
         </div>
 
         <div id="prepBanner"></div>
-
         <div class="grid g4" id="homeStats"></div>
 
         <div class="grid g2" style="margin-top:20px">
@@ -307,7 +318,7 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <!-- ============ PREP ============ -->
+      <!-- PREP -->
       <div class="page hidden" id="page-prep">
         <div class="hero" style="background:linear-gradient(120deg,#2E3A3C,#4E6350 50%,#7C8B8B)">
           <h1>🧪 Ön Hazırlık — Deney Düzeneği Kurulumu</h1>
@@ -357,7 +368,7 @@ canvas{width:100%;height:100%;display:block}
               </div>
               <div class="field full">
                 <label>Deney Grubu Açıklaması</label>
-                <textarea id="pExpDesc" rows="2" placeholder="Penicillium ekimi yapılmış, test koşullarına maruz bırakılan grup.">Penicillium ekimi yapılmış, test koşullarına maruz bırakılan grup.</textarea>
+                <textarea id="pExpDesc" rows="2">Penicillium ekimi yapılmış, test koşullarına maruz bırakılan grup.</textarea>
               </div>
             </div>
 
@@ -369,7 +380,7 @@ canvas{width:100%;height:100%;display:block}
               </div>
               <div class="field full">
                 <label>Kontrol Grubu Açıklaması</label>
-                <textarea id="pCtlDesc" rows="2" placeholder="Ekim yapılmamış, aynı koşullarda bekletilen steril referans grup.">Ekim yapılmamış, aynı koşullarda bekletilen steril referans grup.</textarea>
+                <textarea id="pCtlDesc" rows="2">Ekim yapılmamış, aynı koşullarda bekletilen steril referans grup.</textarea>
               </div>
             </div>
 
@@ -379,21 +390,21 @@ canvas{width:100%;height:100%;display:block}
             </p>
             <div class="checklist" id="checklist"></div>
 
-            <div class="card-title" style="margin-top:26px">Ek Notlar & Düzenek Fotoğrafı</div>
+            <div class="card-title" style="margin-top:26px">Ek Notlar & Düzenek Fotoğrafları</div>
             <div class="form-grid">
               <div class="field full">
                 <label>Ek Notlar</label>
                 <textarea id="pNotes" rows="3" placeholder="Kullanılan malzemeler, kimyasallar, cihaz markaları vb."></textarea>
               </div>
               <div class="field full">
-                <label>Düzenek Fotoğrafı</label>
+                <label>Düzenek Fotoğrafları (birden fazla seçebilirsiniz)</label>
                 <div class="photo-drop" onclick="document.getElementById('pPhoto').click()">
                   <div style="font-size:26px;margin-bottom:6px">📷</div>
-                  <div style="font-size:13px;color:var(--muted)">Kurulmuş deney düzeneğinin fotoğrafını yükleyin</div>
-                  <input type="file" id="pPhoto" accept="image/*" onchange="handlePrepPhoto(event)">
+                  <div style="font-size:13px;color:var(--muted)">Fotoğraf(ları) yüklemek için tıklayın</div>
+                  <input type="file" id="pPhoto" accept="image/*" multiple onchange="handlePrepPhoto(event)">
                   <div id="pPhotoName" style="font-size:11.5px;color:var(--yesil-dark);margin-top:8px;font-weight:600"></div>
-                  <img id="pPhotoPreview" class="preview hidden">
                 </div>
+                <div class="photo-grid" id="pPhotoGrid"></div>
               </div>
             </div>
 
@@ -405,7 +416,7 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <!-- ============ ENTRY ============ -->
+      <!-- ENTRY -->
       <div class="page hidden" id="page-entry">
         <div id="entryLock"></div>
 
@@ -474,14 +485,14 @@ canvas{width:100%;height:100%;display:block}
                   <textarea id="fNote" rows="3" placeholder="Örn: Koloni kenarlarında beyaz miselyum halkası oluştu..."></textarea>
                 </div>
                 <div class="field full">
-                  <label>Gelişim Fotoğrafı</label>
+                  <label>Gelişim Fotoğrafları (birden fazla seçebilirsiniz)</label>
                   <div class="photo-drop" onclick="document.getElementById('fPhoto').click()">
                     <div style="font-size:26px;margin-bottom:6px">📷</div>
-                    <div style="font-size:13px;color:var(--muted)">Fotoğraf yüklemek için tıklayın</div>
-                    <input type="file" id="fPhoto" accept="image/*" onchange="handlePhoto(event)">
+                    <div style="font-size:13px;color:var(--muted)">Fotoğraf(ları) yüklemek için tıklayın</div>
+                    <input type="file" id="fPhoto" accept="image/*" multiple onchange="handlePhoto(event)">
                     <div id="photoName" style="font-size:11.5px;color:var(--yesil-dark);margin-top:8px;font-weight:600"></div>
-                    <img id="photoPreview" class="preview hidden">
                   </div>
+                  <div class="photo-grid" id="photoGrid"></div>
                 </div>
               </div>
               <div class="actions">
@@ -493,7 +504,7 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <!-- ============ RECORDS ============ -->
+      <!-- RECORDS -->
       <div class="page hidden" id="page-records">
         <div class="card">
           <div class="card-title">Gruplar Arası Karşılaştırma Grafiği</div>
@@ -531,14 +542,13 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <!-- ============ REPORT ============ -->
+      <!-- REPORT -->
       <div class="page hidden" id="page-report">
         <div class="hero" style="background:linear-gradient(120deg,#2E3A3C,#4E6350 50%,#7C8B8B)">
           <h1>📄 Bilimsel Raporlama</h1>
           <p>
             Ön hazırlık bilgileri, deney ve kontrol grubuna ait tüm ölçümler, istatistiksel özetler ve
-            gelişim fotoğrafları tek bir PDF dosyasında birleştirilir. Rapor; karşılaştırma tablosu,
-            gözlem notları ve görsel kanıtları içerir.
+            gelişim fotoğrafları tek bir PDF dosyasında birleştirilir.
           </p>
         </div>
 
@@ -547,12 +557,11 @@ canvas{width:100%;height:100%;display:block}
             <div class="card-title">Rapor İçeriği</div>
             <ul style="font-size:13px;line-height:2.1;color:#4A5654;padding-left:18px">
               <li>Deney başlığı, hipotez ve ön hazırlık adımları</li>
-              <li>Deney düzeneği fotoğrafı</li>
+              <li>Deney düzeneği fotoğrafları</li>
               <li>Grup tanımları (deney & kontrol)</li>
               <li>Özet istatistikler (her grup için ayrı)</li>
-              <li>Günlük ölçüm tablosu (tüm kayıtlar)</li>
-              <li>Gelişim fotoğrafları galerisi</li>
-              <li>Sayfa numaralandırma ve rapor tarihi</li>
+              <li>Günlük ölçüm tablosu</li>
+              <li>Tüm gelişim fotoğrafları</li>
             </ul>
             <div class="actions">
               <button class="btn btn-primary" onclick="exportPDF()">📥 PDF Raporu İndir</button>
@@ -566,7 +575,7 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <!-- ============ DATA ============ -->
+      <!-- DATA -->
       <div class="page hidden" id="page-data">
         <div class="notice info">
           🗄️ Veriler yalnızca bu tarayıcıda saklanır. Farklı bir bilgisayara taşımak için yedek alın.
@@ -587,7 +596,7 @@ canvas{width:100%;height:100%;display:block}
             <div class="card-title">Tehlikeli İşlemler</div>
             <div style="display:flex;flex-direction:column;gap:11px">
               <button class="btn btn-danger" onclick="clearRecords()">🗑️ Sadece Ölçüm Kayıtlarını Sil</button>
-              <button class="btn btn-danger" onclick="clearAll()">⚠️ Tüm Sistemi Sıfırla (Hazırlık + Kayıtlar)</button>
+              <button class="btn btn-danger" onclick="clearAll()">⚠️ Tüm Sistemi Sıfırla</button>
             </div>
           </div>
         </div>
@@ -597,14 +606,22 @@ canvas{width:100%;height:100%;display:block}
   </div>
 </div>
 
-<div class="modal hidden" id="imgModal" onclick="closeModal()">
+<!-- MODAL -->
+<div class="modal hidden" id="imgModal" onclick="if(event.target===this)closeModal()">
   <button class="close" onclick="closeModal()">✕</button>
   <img id="modalImg" src="">
+  <div class="modal-nav hidden" id="modalNav">
+    <button onclick="modalPrev()">‹</button>
+    <div class="counter" id="modalCounter">1 / 1</div>
+    <button onclick="modalNext()">›</button>
+  </div>
 </div>
 
 <script>
 /* =========================================================
-   PENICILLIUM DENEY & KONTROL TAKİP SİSTEMİ
+   PENICILLIUM DENEY & KONTROL TAKİP SİSTEMİ v2.1
+   - Çoklu fotoğraf desteği
+   - Fotoğraf silme özelliği
    ========================================================= */
 const ADMIN_PASS = 'admin123456';
 const LS_REC  = 'pnc_v2_records';
@@ -633,10 +650,13 @@ let state = {
   metric: 'temp',
   filter: 'all',
   activeGroup: 'deney',
-  pendingPhoto: null,
-  pendingPrepPhoto: null,
+  pendingPhotos: [],       // entry formu için
+  pendingPrepPhotos: [],   // ön hazırlık için
   prepChecks: {}
 };
+
+let modalGallery = [];
+let modalIndex = 0;
 
 /* STORAGE */
 function loadAll(){
@@ -647,6 +667,14 @@ function loadAll(){
 function persistRecords(){ localStorage.setItem(LS_REC, JSON.stringify(state.records)); }
 function persistPrep(){ localStorage.setItem(LS_PREP, JSON.stringify(state.prep)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* FOTOĞRAF YARDIMCILARI */
+function getPhotos(r){
+  if(!r) return [];
+  if(Array.isArray(r.photos)) return r.photos.filter(Boolean);
+  if(r.photo) return [r.photo];   // eski tek-foto kayıtları için uyumluluk
+  return [];
+}
 
 /* LOGIN */
 function doLogin(){
@@ -694,7 +722,6 @@ const TITLES = {
   data:    ['Sistem','Veri Yönetimi']
 };
 function go(page){
-  // günlük ölçüm kilidi
   if(page === 'entry' && !state.prep?.completed){
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById('page-entry').classList.remove('hidden');
@@ -751,9 +778,15 @@ function groupBadge(g){
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
-function photoCell(p, id){
-  if(!p) return '<span style="color:#B9B4A6;font-size:11px">—</span>';
-  return `<img class="thumb" src="${p}" onclick="openModal('${id}')" alt="foto">`;
+function photoCell(photos, id){
+  if(!photos || !photos.length) return '<span style="color:#B9B4A6;font-size:11px">—</span>';
+  const extra = photos.length > 1
+    ? `<span style="position:absolute;bottom:-4px;right:-4px;background:#2E3A3C;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:800;border:2px solid #fff">+${photos.length-1}</span>`
+    : '';
+  return `<div style="position:relative;display:inline-block;cursor:pointer" onclick="openModal('${id}')">
+    <img class="thumb" src="${photos[0]}">
+    ${extra}
+  </div>`;
 }
 
 /* LOCKS */
@@ -769,7 +802,6 @@ function renderHome(){
   const deneyR = recs.filter(r => r.group === 'deney');
   const kontrolR = recs.filter(r => r.group === 'kontrol');
 
-  // banner
   const pb = document.getElementById('prepBanner');
   if(!state.prep?.completed){
     pb.innerHTML = `<div class="notice warn">
@@ -795,10 +827,12 @@ function renderHome(){
     box.innerHTML = `<div class="empty"><div class="big">🧫</div>Henüz ölçüm kaydı yok.<br>
       <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="go('entry')">İlk Ölçümü Ekle</button></div>`;
   } else {
-    box.innerHTML = recent.map(r => `
+    box.innerHTML = recent.map(r => {
+      const photos = getPhotos(r);
+      return `
       <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #F0EDE5">
-        ${r.photo ? `<img src="${r.photo}" class="thumb" onclick="openModal('${r.id}')">`
-                  : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:#F1EFE7;color:#B9B4A6">—</div>`}
+        ${photos.length ? `<img src="${photos[0]}" class="thumb" onclick="openModal('${r.id}')">`
+                        : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:#F1EFE7;color:#B9B4A6">—</div>`}
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:13px;color:var(--kuf-deep);display:flex;gap:8px;align-items:center">
             ${fmtDate(r.date)} ${groupBadge(r.group)}
@@ -806,9 +840,11 @@ function renderHome(){
           <div style="font-size:12px;color:var(--muted);margin-top:3px">
             🌡️ ${r.temp}°C &nbsp; 💧 ${r.hum}% &nbsp; ⚗️ pH ${r.ph}
             ${r.grow ? ` &nbsp; 📈 ${r.grow} mm` : ''}
+            ${photos.length > 1 ? ` &nbsp; 📷 ${photos.length} foto` : ''}
           </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 }
 
@@ -843,32 +879,52 @@ function fillPrepForm(p){
   document.getElementById('pNotes').value   = p.notes || '';
   state.prepChecks = p.checks || {};
   renderChecklist();
-  if(p.photo){
-    state.pendingPrepPhoto = p.photo;
-    const prev = document.getElementById('pPhotoPreview');
-    prev.src = p.photo; prev.classList.remove('hidden');
-    document.getElementById('pPhotoName').textContent = '✓ Mevcut düzenek fotoğrafı';
-  }
+  state.pendingPrepPhotos = getPhotos(p);
+  renderPrepPhotoGrid();
 }
 
 function handlePrepPhoto(ev){
-  const file = ev.target.files[0]; if(!file) return;
-  const rd = new FileReader();
-  rd.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const maxW = 800, sc = Math.min(1, maxW/img.width);
-      const c = document.createElement('canvas');
-      c.width = img.width*sc; c.height = img.height*sc;
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      state.pendingPrepPhoto = c.toDataURL('image/jpeg', 0.78);
-      const prev = document.getElementById('pPhotoPreview');
-      prev.src = state.pendingPrepPhoto; prev.classList.remove('hidden');
-      document.getElementById('pPhotoName').textContent = '✓ ' + file.name;
+  const files = Array.from(ev.target.files || []);
+  if(!files.length) return;
+  let remaining = files.length;
+  files.forEach(file => {
+    const rd = new FileReader();
+    rd.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 900, sc = Math.min(1, maxW/img.width);
+        const c = document.createElement('canvas');
+        c.width = img.width*sc; c.height = img.height*sc;
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        state.pendingPrepPhotos.push(c.toDataURL('image/jpeg', 0.78));
+        remaining--;
+        if(remaining === 0) renderPrepPhotoGrid();
+      };
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  rd.readAsDataURL(file);
+    rd.readAsDataURL(file);
+  });
+  ev.target.value = '';
+}
+
+function renderPrepPhotoGrid(){
+  const grid = document.getElementById('pPhotoGrid');
+  const lbl = document.getElementById('pPhotoName');
+  if(!state.pendingPrepPhotos.length){
+    grid.innerHTML = ''; lbl.textContent = ''; return;
+  }
+  grid.innerHTML = state.pendingPrepPhotos.map((p,i) => `
+    <div class="photo-item">
+      <img src="${p}">
+      <button type="button" class="photo-del" title="Fotoğrafı sil" onclick="removePrepPhoto(${i})">×</button>
+    </div>`).join('');
+  lbl.textContent = `✓ ${state.pendingPrepPhotos.length} fotoğraf yüklendi`;
+}
+
+function removePrepPhoto(i){
+  if(!confirm('Bu fotoğrafı silmek istiyor musunuz?')) return;
+  state.pendingPrepPhotos.splice(i,1);
+  renderPrepPhotoGrid();
 }
 
 function savePrep(ev){
@@ -890,7 +946,8 @@ function savePrep(ev){
     ctlDesc: document.getElementById('pCtlDesc').value.trim(),
     notes: document.getElementById('pNotes').value.trim(),
     checks: checks,
-    photo: state.pendingPrepPhoto || null,
+    photos: state.pendingPrepPhotos.slice(),
+    photo: state.pendingPrepPhotos[0] || null,
     savedAt: new Date().toISOString()
   };
   persistPrep();
@@ -903,8 +960,8 @@ function savePrep(ev){
 function resetPrepForm(){
   document.getElementById('prepForm').reset();
   state.prepChecks = {};
-  state.pendingPrepPhoto = null;
-  document.getElementById('pPhotoPreview').classList.add('hidden');
+  state.pendingPrepPhotos = [];
+  document.getElementById('pPhotoGrid').innerHTML = '';
   document.getElementById('pPhotoName').textContent = '';
   document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
   renderChecklist();
@@ -914,13 +971,15 @@ function renderPrep(){
   const s = document.getElementById('prepStatus');
   if(state.prep?.completed){
     const ck = CHECK_ITEMS.filter(c => state.prep.checks?.[c.k]);
+    const photos = getPhotos(state.prep);
     s.innerHTML = `<div class="card" style="background:linear-gradient(135deg,#F6FAF1,#EDF5E1);border-color:var(--yesil-light)">
       <div class="card-title" style="margin-bottom:10px">✅ Ön Hazırlık Tamamlandı</div>
       <div style="font-size:13.5px;line-height:2;color:#3E5530">
         <b>Başlık:</b> ${escapeHtml(state.prep.title)}<br>
         <b>Başlangıç:</b> ${fmtDate(state.prep.date)} &nbsp;•&nbsp;
         <b>Hedef:</b> ${state.prep.temp||'—'} °C / %${state.prep.hum||'—'} / pH ${state.prep.ph||'—'}<br>
-        <b>Tamamlanan Adım:</b> ${ck.length} / ${CHECK_ITEMS.length}
+        <b>Tamamlanan Adım:</b> ${ck.length} / ${CHECK_ITEMS.length} &nbsp;•&nbsp;
+        <b>Fotoğraf:</b> ${photos.length} adet
       </div>
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="go('entry')">📝 Günlük Ölçüme Git</button>
@@ -953,23 +1012,47 @@ function selectGroup(g){
 }
 
 function handlePhoto(ev){
-  const file = ev.target.files[0]; if(!file) return;
-  const rd = new FileReader();
-  rd.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const maxW = 700, sc = Math.min(1, maxW/img.width);
-      const c = document.createElement('canvas');
-      c.width = img.width*sc; c.height = img.height*sc;
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      state.pendingPhoto = c.toDataURL('image/jpeg', 0.78);
-      const prev = document.getElementById('photoPreview');
-      prev.src = state.pendingPhoto; prev.classList.remove('hidden');
-      document.getElementById('photoName').textContent = '✓ ' + file.name;
+  const files = Array.from(ev.target.files || []);
+  if(!files.length) return;
+  let remaining = files.length;
+  files.forEach(file => {
+    const rd = new FileReader();
+    rd.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 800, sc = Math.min(1, maxW/img.width);
+        const c = document.createElement('canvas');
+        c.width = img.width*sc; c.height = img.height*sc;
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        state.pendingPhotos.push(c.toDataURL('image/jpeg', 0.78));
+        remaining--;
+        if(remaining === 0) renderPhotoGrid();
+      };
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  rd.readAsDataURL(file);
+    rd.readAsDataURL(file);
+  });
+  ev.target.value = '';
+}
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photoGrid');
+  const lbl  = document.getElementById('photoName');
+  if(!state.pendingPhotos.length){
+    grid.innerHTML = ''; lbl.textContent = ''; return;
+  }
+  grid.innerHTML = state.pendingPhotos.map((p,i) => `
+    <div class="photo-item">
+      <img src="${p}">
+      <button type="button" class="photo-del" title="Fotoğrafı sil" onclick="removePendingPhoto(${i})">×</button>
+    </div>`).join('');
+  lbl.textContent = `✓ ${state.pendingPhotos.length} fotoğraf yüklendi`;
+}
+
+function removePendingPhoto(i){
+  if(!confirm('Bu fotoğrafı silmek istiyor musunuz?')) return;
+  state.pendingPhotos.splice(i,1);
+  renderPhotoGrid();
 }
 
 function saveRecord(ev){
@@ -986,16 +1069,14 @@ function saveRecord(ev){
     grow:  document.getElementById('fGrow').value,
     color: document.getElementById('fColor').value,
     note:  document.getElementById('fNote').value.trim(),
-    photo: state.pendingPhoto || null,
+    photos: state.pendingPhotos.slice(),
+    photo: state.pendingPhotos[0] || null,
     user:  'Yönetici'
   };
 
   if(id){
     const i = state.records.findIndex(r => r.id === id);
-    if(i > -1){
-      if(!data.photo) data.photo = state.records[i].photo;
-      state.records[i] = { ...state.records[i], ...data };
-    }
+    if(i > -1) state.records[i] = { ...state.records[i], ...data };
   } else {
     state.records.push({ id: uid(), created: new Date().toISOString(), ...data });
   }
@@ -1010,9 +1091,8 @@ function resetForm(){
   document.getElementById('recId').value = '';
   document.getElementById('recGroup').value = state.activeGroup;
   document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
-  state.pendingPhoto = null;
-  document.getElementById('photoPreview').classList.add('hidden');
-  document.getElementById('photoPreview').src = '';
+  state.pendingPhotos = [];
+  document.getElementById('photoGrid').innerHTML = '';
   document.getElementById('photoName').textContent = '';
 }
 
@@ -1027,11 +1107,8 @@ function editRecord(id){
   document.getElementById('fGrow').value  = r.grow || '';
   document.getElementById('fColor').value = r.color || 'Yeşil';
   document.getElementById('fNote').value  = r.note || '';
-  state.pendingPhoto = r.photo || null;
-  const prev = document.getElementById('photoPreview');
-  if(r.photo){ prev.src = r.photo; prev.classList.remove('hidden'); }
-  else { prev.classList.add('hidden'); prev.src = ''; }
-  document.getElementById('photoName').textContent = r.photo ? '✓ Mevcut fotoğraf' : '';
+  state.pendingPhotos = getPhotos(r);
+  renderPhotoGrid();
   selectGroup(r.group);
   go('entry');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1063,7 +1140,9 @@ function renderRecords(){
     body.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="big">📊</div>Kayıt bulunmuyor.</div></td></tr>`;
     return;
   }
-  body.innerHTML = recs.map(r => `
+  body.innerHTML = recs.map(r => {
+    const photos = getPhotos(r);
+    return `
     <tr>
       <td style="font-weight:700;white-space:nowrap">${fmtDate(r.date)}</td>
       <td>${groupBadge(r.group)}</td>
@@ -1073,12 +1152,13 @@ function renderRecords(){
       <td>${colorBadge(r.color)}</td>
       <td>${r.grow ? r.grow + ' mm' : '—'}</td>
       <td style="max-width:200px;font-size:12px;color:var(--muted)">${r.note ? escapeHtml(r.note) : '—'}</td>
-      <td>${photoCell(r.photo, r.id)}</td>
+      <td>${photoCell(photos, r.id)}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editRecord('${r.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">🗑️</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 /* ============ CHART ============ */
@@ -1137,7 +1217,6 @@ function drawChart(){
   const X = i => padL + (dates.length === 1 ? cw/2 : (i/(dates.length-1))*cw);
   const Y = v => padT + ch - ((v - min)/(max - min))*ch;
 
-  // grid
   ctx.strokeStyle = '#EDEAE1'; ctx.lineWidth = 1;
   ctx.fillStyle = '#9AA5A3'; ctx.font = '600 10.5px Segoe UI, sans-serif'; ctx.textAlign='right';
   for(let i=0;i<=4;i++){
@@ -1146,9 +1225,7 @@ function drawChart(){
     ctx.fillText((max - ((max-min)/4)*i).toFixed(1), padL-9, y+4);
   }
 
-  // helper: draw series
   function drawSeries(pts, color){
-    // area
     const segments = [];
     let cur = [];
     pts.forEach((v,i) => {
@@ -1185,7 +1262,6 @@ function drawChart(){
   drawSeries(kontrolPts, '#7C8B8B');
   drawSeries(deneyPts,   '#7FA65A');
 
-  // x labels
   ctx.fillStyle = '#9AA5A3'; ctx.font = '600 10px Segoe UI, sans-serif'; ctx.textAlign='center';
   const step = Math.max(1, Math.ceil(dates.length/7));
   dates.forEach((d,i) => {
@@ -1195,7 +1271,6 @@ function drawChart(){
     }
   });
 
-  // title
   ctx.fillStyle = '#4A5654'; ctx.font = '800 12px Segoe UI, sans-serif'; ctx.textAlign='left';
   ctx.fillText(labels[key], padL, 12);
 }
@@ -1209,12 +1284,12 @@ function renderDataStats(){
   const recs = state.records;
   const deneyR = recs.filter(r => r.group==='deney').length;
   const kontrolR = recs.filter(r => r.group==='kontrol').length;
-  const withPhoto = recs.filter(r => r.photo).length;
+  const totalPhotos = recs.reduce((sum, r) => sum + getPhotos(r).length, 0);
   document.getElementById('dataStats').innerHTML = `
     <div class="stat s1"><div class="lbl">Toplam Kayıt</div><div class="val">${recs.length}</div></div>
     <div class="stat s2"><div class="lbl">Deney Grubu</div><div class="val">${deneyR}</div></div>
     <div class="stat s3"><div class="lbl">Kontrol Grubu</div><div class="val">${kontrolR}</div></div>
-    <div class="stat s4"><div class="lbl">Fotoğraflı</div><div class="val">${withPhoto}</div></div>`;
+    <div class="stat s4"><div class="lbl">Toplam Fotoğraf</div><div class="val">${totalPhotos}</div></div>`;
 }
 function backupJSON(){
   const data = { prep: state.prep, records: state.records, exportedAt: new Date().toISOString() };
@@ -1253,10 +1328,10 @@ function clearRecords(){
 function clearAll(){
   if(!confirm('Tüm sistem sıfırlanacak: ön hazırlık + kayıtlar. Emin misiniz?')) return;
   if(!confirm('Bu işlem geri alınamaz! Son onay?')) return;
-  state.records = []; state.prep = null; state.prepChecks = {}; state.pendingPrepPhoto = null;
+  state.records = []; state.prep = null; state.prepChecks = {}; state.pendingPrepPhotos = [];
   persistRecords(); persistPrep();
   document.getElementById('prepForm').reset();
-  document.getElementById('pPhotoPreview').classList.add('hidden');
+  document.getElementById('pPhotoGrid').innerHTML = '';
   document.getElementById('pPhotoName').textContent = '';
   renderChecklist(); updateLocks(); renderHome(); renderDataStats();
   showToast('⚠️ Sistem sıfırlandı.');
@@ -1273,6 +1348,7 @@ function renderReportSummary(){
   const deneyR = recs.filter(r => r.group==='deney');
   const kontrolR = recs.filter(r => r.group==='kontrol');
   const p = state.prep || {};
+  const totalPhotos = recs.reduce((s, r) => s + getPhotos(r).length, 0);
   document.getElementById('reportSummary').innerHTML = `
     <div>🧪 <b>Deney:</b> ${escapeHtml(p.title || '—')}</div>
     <div>📅 <b>Başlangıç:</b> ${p.date ? fmtDate(p.date) : '—'}</div>
@@ -1281,7 +1357,7 @@ function renderReportSummary(){
     <div>🌡️ <b>Deney ort. sıcaklık:</b> ${avgOf(deneyR,'temp')} °C</div>
     <div>💧 <b>Deney ort. nem:</b> ${avgOf(deneyR,'hum')} %</div>
     <div>⚗️ <b>Deney ort. pH:</b> ${avgOf(deneyR,'ph')}</div>
-    <div>📸 <b>Fotoğraflı kayıt:</b> ${recs.filter(r=>r.photo).length} adet</div>`;
+    <div>📸 <b>Toplam fotoğraf:</b> ${totalPhotos} adet</div>`;
 }
 
 /* ============ PDF ============ */
@@ -1306,33 +1382,24 @@ function exportPDF(){
   /* COVER */
   doc.setFillColor(46,58,60); doc.rect(0,0,PW,50,'F');
   doc.setFillColor(127,166,90); doc.rect(0,50,PW,3,'F');
-
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
   doc.text('PENICILLIUM DENEYI', 14, 22);
-
   doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(200,215,195);
   doc.text(pdfSafe(p.title || 'Deney & Kontrol Grubu Karsilastirmali Rapor'), 14, 32);
-
   doc.setFontSize(9); doc.setTextColor(170,190,165);
   doc.text('Rapor Tarihi: ' + now.toLocaleDateString('tr-TR') + '  |  Hazirlayan: Yonetici', 14, 44);
 
   let y = 62;
-
-  /* HYPOTHESIS + PREP */
   doc.setTextColor(46,58,60); doc.setFont('helvetica','bold'); doc.setFontSize(12);
   doc.text('Deney Bilgileri', 14, y); y += 7;
-
   doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60,70,68);
   const hypoLines = doc.splitTextToSize('Hipotez: ' + pdfSafe(p.hypo || '-'), PW - 28);
   doc.text(hypoLines, 14, y); y += hypoLines.length * 4.5 + 4;
 
-  const info = [
-    ['Baslangic Tarihi', p.date ? fmtDate(p.date) : '-'],
-    ['Hedef Sicaklik', (p.temp || '-') + ' C'],
-    ['Hedef Nem', (p.hum || '-') + ' %'],
-    ['Hedef pH', p.ph || '-']
-  ];
-  info.forEach(it => {
+  [['Baslangic Tarihi', p.date ? fmtDate(p.date) : '-'],
+   ['Hedef Sicaklik', (p.temp || '-') + ' C'],
+   ['Hedef Nem', (p.hum || '-') + ' %'],
+   ['Hedef pH', p.ph || '-']].forEach(it => {
     doc.setFont('helvetica','bold'); doc.setTextColor(122,139,139); doc.setFontSize(8.5);
     doc.text(pdfSafe(it[0]) + ':', 14, y);
     doc.setFont('helvetica','normal'); doc.setTextColor(46,58,60);
@@ -1341,20 +1408,16 @@ function exportPDF(){
   });
   y += 3;
 
-  /* GROUPS */
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
   doc.text('Grup Tanimlari', 14, y); y += 7;
-
   doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60,70,68);
   doc.text('Deney Grubu: ' + pdfSafe(p.expName || 'Deney Grubu'), 14, y); y += 5;
   const d1 = doc.splitTextToSize(pdfSafe(p.expDesc || '-'), PW - 28);
   doc.text(d1, 14, y); y += d1.length*4.5 + 3;
-
   doc.text('Kontrol Grubu: ' + pdfSafe(p.ctlName || 'Kontrol Grubu'), 14, y); y += 5;
   const d2 = doc.splitTextToSize(pdfSafe(p.ctlDesc || '-'), PW - 28);
   doc.text(d2, 14, y); y += d2.length*4.5 + 6;
 
-  /* CHECKLIST */
   if(p.checks && Object.keys(p.checks).length){
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(46,58,60);
     doc.text('Tamamlanan Hazirlik Adimlari', 14, y); y += 6;
@@ -1368,25 +1431,35 @@ function exportPDF(){
     y += 4;
   }
 
-  /* SETUP PHOTO */
-  if(p.photo){
-    if(y > PH - 90){ doc.addPage(); y = 20; }
-    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(46,58,60);
-    doc.text('Deney Duzenegi Fotografi', 14, y); y += 5;
-    try{
-      const imgW = 110, imgH = 82;
-      doc.addImage(p.photo, 'JPEG', 14, y, imgW, imgH, undefined, 'FAST');
+  /* SETUP PHOTOS (hepsi) */
+  const prepPhotos = getPhotos(p);
+  if(prepPhotos.length){
+    doc.addPage();
+    doc.setFillColor(46,58,60); doc.rect(0,0,PW,18,'F');
+    doc.setFillColor(127,166,90); doc.rect(0,18,PW,2,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('Deney Duzenegi Fotograflari', 14, 12);
+
+    let x = 14, yy = 28, imgW = 86, imgH = 68, gap = 8, col = 0;
+    prepPhotos.forEach((ph, idx) => {
+      if(yy + imgH + 12 > PH - 14){ doc.addPage(); yy = 20; x = 14; col = 0; }
+      try{ doc.addImage(ph, 'JPEG', x, yy, imgW, imgH, undefined, 'FAST'); }catch(e){}
       doc.setDrawColor(216,201,163); doc.setLineWidth(0.4);
-      doc.rect(14, y, imgW, imgH);
-      y += imgH + 8;
-    }catch(e){ y += 6; }
+      doc.rect(x, yy, imgW, imgH);
+      doc.setTextColor(46,58,60); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+      doc.text('Duzenek Fotografi #' + (idx+1), x, yy + imgH + 5);
+      col++;
+      if(col % 2 === 0){ x = 14; yy += imgH + 12; }
+      else { x = 14 + imgW + gap; }
+    });
   }
 
-  /* STATS BOXES */
+  /* STATS */
   const deneyR = recs.filter(r => r.group==='deney');
   const kontrolR = recs.filter(r => r.group==='kontrol');
 
   if(y > PH - 50){ doc.addPage(); y = 20; }
+  else { y += 6; }
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
   doc.text('Ozet Istatistikler', 14, y); y += 7;
 
@@ -1413,8 +1486,7 @@ function exportPDF(){
   /* TABLE */
   if(y > PH - 60){ doc.addPage(); y = 20; }
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(46,58,60);
-  doc.text('Gunluk Olcum Tablosu', 14, y);
-  y += 4;
+  doc.text('Gunluk Olcum Tablosu', 14, y); y += 4;
 
   const rows = recs.map(r => [
     pdfSafe(fmtDate(r.date)),
@@ -1424,119 +1496,15 @@ function exportPDF(){
     r.ph   != null ? r.ph   : '-',
     pdfSafe(r.color || '-'),
     r.grow ? r.grow + ' mm' : '-',
-    pdfSafe((r.note || '-').substring(0, 50))
+    String(getPhotos(r).length),
+    pdfSafe((r.note || '-').substring(0, 45))
   ]);
 
   doc.autoTable({
     startY: y,
-    head: [['Tarih','Grup','Sic. (C)','Nem (%)','pH','Renk','Cap','Gozlem']],
+    head: [['Tarih','Grup','Sic.','Nem','pH','Renk','Cap','Fot','Gozlem']],
     body: rows,
     theme: 'grid',
-    styles: { font:'helvetica', fontSize:7.8, cellPadding:2.4, textColor:[45,55,53], lineColor:[226,222,210], lineWidth:0.2 },
-    headStyles: { fillColor:[127,166,90], textColor:[255,255,255], fontStyle:'bold', fontSize:7.6, halign:'center' },
-    alternateRowStyles: { fillColor:[250,249,244] },
-    columnStyles: {
-      0:{cellWidth:18, fontStyle:'bold'},
-      1:{cellWidth:16, halign:'center'},
-      2:{cellWidth:15, halign:'center'},
-      3:{cellWidth:15, halign:'center'},
-      4:{cellWidth:12, halign:'center'},
-      5:{cellWidth:22, halign:'center'},
-      6:{cellWidth:17, halign:'center'},
-      7:{cellWidth:'auto'}
-    },
-    margin: {left:14, right:14},
-    didParseCell: (data) => {
-      if(data.section === 'body' && data.column.index === 1){
-        data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.textColor = data.cell.raw === 'Deney' ? [85,122,54] : [70,85,90];
-      }
-    }
-  });
-
-  /* PHOTOS */
-  const withPhoto = recs.filter(r => r.photo);
-  if(withPhoto.length){
-    doc.addPage();
-    doc.setFillColor(46,58,60); doc.rect(0,0,PW,18,'F');
-    doc.setFillColor(127,166,90); doc.rect(0,18,PW,2,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(13);
-    doc.text('Gelisim Fotograflari', 14, 12);
-
-    let x = 14, yy = 28, imgW = 86, imgH = 68, gap = 8, col = 0;
-
-    withPhoto.forEach(r => {
-      if(yy + imgH + 14 > PH - 14){ doc.addPage(); yy = 20; x = 14; col = 0; }
-      try{ doc.addImage(r.photo, 'JPEG', x, yy, imgW, imgH, undefined, 'FAST'); }catch(e){}
-      doc.setDrawColor(216,201,163); doc.setLineWidth(0.4);
-      doc.rect(x, yy, imgW, imgH);
-
-      doc.setTextColor(46,58,60); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-      const lbl = pdfSafe(fmtDate(r.date)) + '  |  ' +
-                  (r.group === 'deney' ? 'DENEY' : 'KONTROL') + '  |  ' +
-                  r.temp + ' C  |  pH ' + r.ph;
-      doc.text(lbl, x, yy + imgH + 5);
-
-      col++;
-      if(col % 2 === 0){ x = 14; yy += imgH + 14; }
-      else { x = 14 + imgW + gap; }
-    });
-  }
-
-  /* PAGE NUMBERS */
-  const pages = doc.internal.getNumberOfPages();
-  for(let i=1;i<=pages;i++){
-    doc.setPage(i);
-    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(150,160,158);
-    doc.text('Penicillium Deney Takip Sistemi  •  Bilimsel Rapor', 14, PH - 8);
-    doc.text('Sayfa ' + i + ' / ' + pages, PW - 14, PH - 8, {align:'right'});
-  }
-
-  doc.save('Penicillium_Rapor_' + now.toISOString().slice(0,10) + '.pdf');
-  showToast('📄 PDF raporu indirildi.');
-}
-
-/* ============ MODAL / TOAST ============ */
-function openModal(id){
-  const r = state.records.find(x => x.id === id); if(!r || !r.photo) return;
-  document.getElementById('modalImg').src = r.photo;
-  document.getElementById('imgModal').classList.remove('hidden');
-}
-function closeModal(){ document.getElementById('imgModal').classList.add('hidden'); }
-
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape') closeModal();
-  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) doLogin();
-});
-
-function showToast(msg){
-  const t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = `position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:#2E3A3C;color:#fff;padding:13px 26px;border-radius:12px;font-size:13.5px;
-    font-weight:600;box-shadow:0 12px 34px rgba(0,0,0,.3);z-index:5000;opacity:0;
-    transition:.28s;font-family:inherit;border-left:4px solid #7FA65A;`;
-  document.body.appendChild(t);
-  requestAnimationFrame(() => {
-    t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
-  });
-  setTimeout(() => {
-    t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)';
-    setTimeout(() => t.remove(), 300);
-  }, 2400);
-}
-
-/* ============ INIT ============ */
-(function init(){
-  loadAll();
-  renderChecklist();
-  const ses = localStorage.getItem(LS_SES);
-  if(ses){
-    try{ state.user = JSON.parse(ses); startApp(); }
-    catch(e){ localStorage.removeItem(LS_SES); }
-  }
-  document.getElementById('loginPass').focus();
-})();
-</script>
-</body>
-</html>
+    styles: { font:'helvetica', fontSize:7.5, cellPadding:2.2, textColor:[45,55,53], lineColor:[226,222,210], lineWidth:0.2 },
+    headStyles: { fillColor:[127,166,90], textColor:[255,255,255], fontStyle:'bold', fontSize:7.3, halign:'center' },
+    alternateRowStyles: { fillColor:[250,249
